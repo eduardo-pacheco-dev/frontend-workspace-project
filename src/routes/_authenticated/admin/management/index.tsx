@@ -135,6 +135,41 @@ function ManagementPage() {
         <Grid size={{ xs: 12 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
+                User Details
+              </Typography>
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700 }}>{users[0].name}</Typography>
+                    <Typography variant="body2" color="text.secondary">{users[0].email}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Chip label={users[0].role} size="small" variant="outlined" color={users[0].role === 'Admin' ? 'primary' : 'default'} />
+                    <Chip label={users[0].status} size="small" color={users[0].status === 'Active' ? 'success' : 'default'} />
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
+                  {[
+                    { label: 'Name', value: users[0].name },
+                    { label: 'Email', value: users[0].email },
+                    { label: 'Role', value: users[0].role },
+                    { label: 'Status', value: users[0].status },
+                  ].map((item) => (
+                    <Box key={item.label}>
+                      <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>{item.value}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid size={{ xs: 12 }}>
+          <Card>
+            <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                   All Companies

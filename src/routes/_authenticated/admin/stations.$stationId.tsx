@@ -14,6 +14,8 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import Menu from '@mui/material/Menu'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import Tabs from '@mui/material/Tabs'
@@ -181,11 +183,13 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 interface FolderItem {
+  id: string
   name: string
-  children?: (FolderItem | DocItem)[]
+  children?: TreeNode[]
 }
 
 interface DocItem {
+  id: string
   name: string
   type: string
   date: string
@@ -194,75 +198,140 @@ interface DocItem {
 
 type TreeNode = FolderItem | DocItem
 
+let nextId = 100
+
+function newId() {
+  return `n${++nextId}`
+}
+
 function isFolder(node: TreeNode): node is FolderItem {
   return 'children' in node
 }
 
-const folderTree: FolderItem = {
+function cloneTree(node: TreeNode): TreeNode {
+  if (isFolder(node)) {
+    return { ...node, children: node.children?.map(cloneTree) }
+  }
+  return { ...node }
+}
+
+function findParent(tree: TreeNode, targetId: string): FolderItem | null {
+  if (!isFolder(tree)) return null
+  if (tree.children?.some((c) => c.id === targetId)) return tree
+  for (const child of tree.children ?? []) {
+    const found = findParent(child, targetId)
+    if (found) return found
+  }
+  return null
+}
+
+function removeFromTree(tree: TreeNode, targetId: string): boolean {
+  const parent = findParent(tree, targetId)
+  if (parent && parent.children) {
+    parent.children = parent.children.filter((c) => c.id !== targetId)
+    return true
+  }
+  return false
+}
+
+const initialTree: FolderItem = {
+  id: 'root',
   name: 'Documents',
   children: [
     {
-      name: 'Reports',
+      id: 'f1', name: 'Reports',
       children: [
-        { name: 'Site Survey Report.pdf', type: 'PDF', date: '2026-04-04', status: 'Approved' },
-        { name: 'Safety Compliance.pdf', type: 'PDF', date: '2026-03-28', status: 'Rejected' },
+        { id: 'f1a', name: '2026', children: [
+          { id: 'd1a1', name: 'Q1 Report.pdf', type: 'PDF', date: '2026-04-04', status: 'Approved' },
+          { id: 'd1a2', name: 'Q2 Forecast.pdf', type: 'PDF', date: '2026-03-28', status: 'Pending' },
+          { id: 'f1a1a', name: 'Monthly', children: [
+            { id: 'd1a1a1', name: 'January.pdf', type: 'PDF', date: '2026-02-01', status: 'Approved' },
+            { id: 'd1a1a2', name: 'February.pdf', type: 'PDF', date: '2026-03-01', status: 'Approved' },
+          ]},
+        ]},
+        { id: 'd1b', name: 'Safety Compliance.pdf', type: 'PDF', date: '2026-03-28', status: 'Rejected' },
       ],
     },
     {
-      name: 'Photos',
+      id: 'f2', name: 'Photos',
       children: [
-        { name: 'Installation Photos.zip', type: 'ZIP', date: '2026-04-03', status: 'Pending' },
-        { name: 'Drone Images.zip', type: 'ZIP', date: '2026-04-01', status: 'Approved' },
+        { id: 'f2a', name: 'Site Visit', children: [
+          { id: 'd2a1', name: 'Installation Photos.zip', type: 'ZIP', date: '2026-04-03', status: 'Pending' },
+          { id: 'd2a2', name: 'Drone Images.zip', type: 'ZIP', date: '2026-04-01', status: 'Approved' },
+        ]},
+        { id: 'f2b', name: 'Equipment', children: [
+          { id: 'd2b1', name: 'Antenna Setup.jpg', type: 'JPG', date: '2026-03-20', status: 'Approved' },
+          { id: 'd2b2', name: 'Cabinet Wiring.jpg', type: 'JPG', date: '2026-03-18', status: 'Approved' },
+        ]},
       ],
     },
     {
-      name: 'Spreadsheets',
+      id: 'f3', name: 'Spreadsheets',
       children: [
-        { name: 'Equipment List.xlsx', type: 'XLSX', date: '2026-04-02', status: 'Approved' },
-        { name: 'Budget Forecast.xlsx', type: 'XLSX', date: '2026-03-20', status: 'Approved' },
+        { id: 'd3a', name: 'Equipment List.xlsx', type: 'XLSX', date: '2026-04-02', status: 'Approved' },
+        { id: 'd3b', name: 'Budget Forecast.xlsx', type: 'XLSX', date: '2026-03-20', status: 'Approved' },
       ],
     },
-    { name: 'Site Access Form.docx', type: 'DOCX', date: '2026-03-25', status: 'Approved' },
-    { name: 'Network Diagram.pdf', type: 'PDF', date: '2026-03-15', status: 'Pending' },
+    { id: 'd4', name: 'Site Access Form.docx', type: 'DOCX', date: '2026-03-25', status: 'Approved' },
+    { id: 'd5', name: 'Network Diagram.pdf', type: 'PDF', date: '2026-03-15', status: 'Pending' },
   ],
 }
 
-function TreeNodeRow({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
-  const [expanded, setExpanded] = useState(false)
+function TreeNodeRow({
+  node,
+  depth = 0,
+  onAdd,
+  onRename,
+  onDelete,
+}: {
+  node: TreeNode
+  depth?: number
+  onAdd: (parentId: string, item: TreeNode) => void
+  onRename: (id: string, name: string) => void
+  onDelete: (id: string) => void
+}) {
+  const [expanded, setExpanded] = useState(true)
+  const [menuEl, setMenuEl] = useState<HTMLElement | null>(null)
   const folder = isFolder(node)
   const indent = depth * 24
 
-  if (!folder) {
+  function handleAction(e: React.MouseEvent, action: string) {
+    e.stopPropagation()
+    setMenuEl(null)
+    if (action === 'add-folder') {
+      const name = prompt('Folder name:')
+      if (name) onAdd(node.id, { id: newId(), name, children: [] })
+    } else if (action === 'add-file') {
+      const name = prompt('File name (with extension):')
+      if (name) {
+        const ext = name.split('.').pop()?.toUpperCase() ?? 'FILE'
+        onAdd(node.id, { id: newId(), name, type: ext, date: new Date().toISOString().slice(0, 10), status: 'Pending' })
+      }
+    } else if (action === 'rename') {
+      const newName = prompt('New name:', node.name)
+      if (newName) onRename(node.id, newName)
+    } else if (action === 'delete') {
+      if (confirm(`Delete "${node.name}"?`)) onDelete(node.id)
+    }
+  }
+
+  function rowIcon() {
+    if (folder) {
+      return (
+        <Box component="span" sx={{ color: 'warning.main', flexShrink: 0, display: 'flex' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          </svg>
+        </Box>
+      )
+    }
     return (
-      <TableRow hover sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
-        <TableCell sx={{ pl: 3 + indent }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box component="span" sx={{ color: 'text.disabled', flexShrink: 0, display: 'flex' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-            </Box>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>{node.name}</Typography>
-          </Box>
-        </TableCell>
-        <TableCell><Chip label={node.type} size="small" variant="outlined" /></TableCell>
-        <TableCell>
-          <Typography variant="body2" color="text.secondary">{node.date}</Typography>
-        </TableCell>
-        <TableCell>
-          <Chip label={node.status} size="small" color={node.status === 'Approved' ? 'success' : node.status === 'Rejected' ? 'error' : 'warning'} />
-        </TableCell>
-        <TableCell>
-          <Button size="small" variant="text" sx={{ borderRadius: 999, minWidth: 0, px: 1.5 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-          </Button>
-        </TableCell>
-      </TableRow>
+      <Box component="span" sx={{ color: 'text.disabled', flexShrink: 0, display: 'flex' }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+      </Box>
     )
   }
 
@@ -270,44 +339,171 @@ function TreeNodeRow({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
     <>
       <TableRow
         hover
-        onClick={() => setExpanded(!expanded)}
-        sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
+        sx={{ cursor: folder ? 'pointer' : 'default', '&:hover': { bgcolor: 'action.hover' } }}
+        onClick={() => folder && setExpanded(!expanded)}
       >
         <TableCell sx={{ pl: 3 + indent }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box
-              component="span"
-              sx={{
-                flexShrink: 0,
-                display: 'flex',
-                transition: 'transform 0.15s',
-                transform: expanded ? 'rotate(90deg)' : 'none',
-                color: 'text.disabled',
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </Box>
-            <Box component="span" sx={{ color: 'warning.main', flexShrink: 0, display: 'flex' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-              </svg>
-            </Box>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{node.name}</Typography>
+            {folder && (
+              <Box
+                component="span"
+                sx={{
+                  flexShrink: 0,
+                  display: 'flex',
+                  transition: 'transform 0.15s',
+                  transform: expanded ? 'rotate(90deg)' : 'none',
+                  color: 'text.disabled',
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </Box>
+            )}
+            {!folder && <Box sx={{ width: 16 }} />}
+            {rowIcon()}
+            <Typography variant="body2" sx={{ fontWeight: folder ? 600 : 500 }}>{node.name}</Typography>
           </Box>
         </TableCell>
-        <TableCell><Chip label="Folder" size="small" variant="outlined" /></TableCell>
-        <TableCell><Typography variant="body2" color="text.disabled">—</Typography></TableCell>
-        <TableCell><Typography variant="body2" color="text.disabled">—</Typography></TableCell>
-        <TableCell><Typography variant="body2" color="text.disabled">—</Typography></TableCell>
+        <TableCell>
+          {folder ? (
+            <Chip label="Folder" size="small" variant="outlined" />
+          ) : (
+            <Chip label={node.type} size="small" variant="outlined" />
+          )}
+        </TableCell>
+        <TableCell>
+          {folder ? (
+            <Typography variant="body2" color="text.disabled">—</Typography>
+          ) : (
+            <Typography variant="body2" color="text.secondary">{node.date}</Typography>
+          )}
+        </TableCell>
+        <TableCell>
+          {folder ? (
+            <Typography variant="body2" color="text.disabled">—</Typography>
+          ) : (
+            <Chip label={node.status} size="small" color={node.status === 'Approved' ? 'success' : node.status === 'Rejected' ? 'error' : 'warning'} />
+          )}
+        </TableCell>
+        <TableCell>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <Button
+              size="small"
+              variant="text"
+              sx={{ borderRadius: 999, minWidth: 0, px: 1 }}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleAction(e, 'rename')
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </Button>
+            <Button
+              size="small"
+              variant="text"
+              color="error"
+              sx={{ borderRadius: 999, minWidth: 0, px: 1 }}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleAction(e, 'delete')
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+            </Button>
+            {folder && (
+              <Button
+                size="small"
+                variant="text"
+                sx={{ borderRadius: 999, minWidth: 0, px: 1 }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setMenuEl(e.currentTarget)
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="19" cy="12" r="1" />
+                  <circle cx="5" cy="12" r="1" />
+                </svg>
+              </Button>
+            )}
+          </Box>
+          <Menu
+            anchorEl={menuEl}
+            open={Boolean(menuEl)}
+            onClose={() => setMenuEl(null)}
+            slotProps={{ paper: { sx: { borderRadius: 2, minWidth: 160 } } }}
+          >
+            <MenuItem dense onClick={(e) => handleAction(e, 'add-folder')}>
+              <ListItemIcon sx={{ minWidth: 28 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                  <line x1="12" y1="11" x2="12" y2="17" />
+                  <line x1="9" y1="14" x2="15" y2="14" />
+                </svg>
+              </ListItemIcon>
+              New Folder
+            </MenuItem>
+            <MenuItem dense onClick={(e) => handleAction(e, 'add-file')}>
+              <ListItemIcon sx={{ minWidth: 28 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="12" y1="11" x2="12" y2="17" />
+                  <line x1="9" y1="14" x2="15" y2="14" />
+                </svg>
+              </ListItemIcon>
+              New File
+            </MenuItem>
+          </Menu>
+        </TableCell>
       </TableRow>
-      {expanded && node.children?.map((child, i) => <TreeNodeRow key={`${node.name}-${i}`} node={child} depth={depth + 1} />)}
+      {folder && expanded && node.children?.map((child) => (
+        <TreeNodeRow key={child.id} node={child} depth={depth + 1} onAdd={onAdd} onRename={onRename} onDelete={onDelete} />
+      ))}
     </>
   )
 }
 
 function DocumentsSection() {
+  const [tree, setTree] = useState(() => cloneTree(initialTree))
+
+  function handleAdd(parentId: string, item: TreeNode) {
+    setTree((prev) => {
+      const t = cloneTree(prev) as FolderItem
+      const parent = findParent(t, parentId) ?? t
+      parent.children = [...(parent.children ?? []), item]
+      return t
+    })
+  }
+
+  function handleRename(id: string, name: string) {
+    setTree((prev) => {
+      const t = cloneTree(prev)
+      const parent = findParent(t, id)
+      if (parent) {
+        const node = parent.children?.find((c) => c.id === id)
+        if (node) node.name = name
+      }
+      return t
+    })
+  }
+
+  function handleDelete(id: string) {
+    setTree((prev) => {
+      const t = cloneTree(prev) as FolderItem
+      removeFromTree(t, id)
+      return t
+    })
+  }
+
   return (
     <Card>
       <CardContent sx={{ p: 3 }}>
@@ -316,10 +512,19 @@ function DocumentsSection() {
             Documents
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" size="small" sx={{ borderRadius: 999 }} onClick={() => {}}>
+            <Button variant="outlined" size="small" sx={{ borderRadius: 999 }} onClick={() => {
+              const name = prompt('Folder name:')
+              if (name) handleAdd((tree as FolderItem).id, { id: newId(), name, children: [] })
+            }}>
               New Folder
             </Button>
-            <Button variant="contained" size="small" sx={{ borderRadius: 999 }}>
+            <Button variant="contained" size="small" sx={{ borderRadius: 999 }} onClick={() => {
+              const name = prompt('File name (with extension):')
+              if (name) {
+                const ext = name.split('.').pop()?.toUpperCase() ?? 'FILE'
+                handleAdd((tree as FolderItem).id, { id: newId(), name, type: ext, date: new Date().toISOString().slice(0, 10), status: 'Pending' })
+              }
+            }}>
               Upload
             </Button>
           </Box>
@@ -336,8 +541,8 @@ function DocumentsSection() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {folderTree.children?.map((child, i) => (
-                <TreeNodeRow key={i} node={child} />
+              {(tree as FolderItem).children?.map((child: TreeNode) => (
+                <TreeNodeRow key={child.id} node={child} onAdd={handleAdd} onRename={handleRename} onDelete={handleDelete} />
               ))}
             </TableBody>
           </Table>

@@ -13,6 +13,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
+import TextField from '@mui/material/TextField'
 import { useTheme } from '@mui/material/styles'
 import { useAuth } from '../../../lib/auth'
 
@@ -40,6 +41,7 @@ function ProfilePage() {
   const { user } = useAuth()
   const theme = useTheme()
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteEmail, setDeleteEmail] = useState('')
 
   return (
     <Box>
@@ -154,16 +156,25 @@ function ProfilePage() {
         </Grid>
       </Box>
 
-      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} maxWidth="xs" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+      <Dialog open={deleteOpen} onClose={() => { setDeleteOpen(false); setDeleteEmail('') }} maxWidth="xs" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
         <DialogTitle sx={{ fontWeight: 700, color: 'error.main' }}>Delete Account</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary">
-            Are you sure you want to delete your account? This action cannot be undone. All your data, company information, and project associations will be permanently removed.
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            This action cannot be undone. Please type your email to confirm.
           </Typography>
+          <TextField
+            label="Confirm email"
+            fullWidth
+            size="small"
+            value={deleteEmail}
+            onChange={(e) => setDeleteEmail(e.target.value)}
+            placeholder={user?.email}
+            autoFocus
+          />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={() => setDeleteOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
-          <Button variant="contained" color="error" sx={{ borderRadius: 999 }} onClick={() => setDeleteOpen(false)}>Delete</Button>
+          <Button onClick={() => { setDeleteOpen(false); setDeleteEmail('') }} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" color="error" sx={{ borderRadius: 999 }} disabled={deleteEmail !== user?.email} onClick={() => { setDeleteOpen(false); setDeleteEmail('') }}>Delete</Button>
         </DialogActions>
       </Dialog>
 

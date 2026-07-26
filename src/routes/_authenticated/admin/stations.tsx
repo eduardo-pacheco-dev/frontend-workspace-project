@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Outlet, useMatches } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -58,6 +58,31 @@ function StationsPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [newStation, setNewStation] = useState<Record<string, string>>({})
   const [snack, setSnack] = useState({ open: false, message: '' })
+  const [sortKey, setSortKey] = useState<string>('')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+
+  const sorted = useMemo(() => {
+    if (!sortKey) return data
+    return [...data].sort((a, b) => {
+      const aVal = (a as any)[sortKey] ?? ''
+      const bVal = (b as any)[sortKey] ?? ''
+      return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+    })
+  }, [data, sortKey, sortDir])
+
+  function toggleSort(key: string) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+
+  function SortIcon({ column }: { column: string }) {
+    if (sortKey !== column) return <Box component="span" sx={{ ml: 0.5, opacity: 0.3 }}>↕</Box>
+    return <Box component="span" sx={{ ml: 0.5 }}>{sortDir === 'asc' ? '↑' : '↓'}</Box>
+  }
 
   if (isChildMatch) {
     return <Outlet />
@@ -85,18 +110,20 @@ function StationsPage() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Site Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Site Type</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Customer Site ID</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Site Reference ID</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Customer</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Modified By</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>ZI Partner</TableCell>
+                  {['status', 'siteName', 'siteType', 'customerSiteId', 'siteReferenceId', 'customer', 'modifiedBy', 'ziPartner'].map((col) => (
+                    <TableCell
+                      key={col}
+                      sx={{ fontWeight: 700, cursor: 'pointer', userSelect: 'none' }}
+                      onClick={() => toggleSort(col)}
+                    >
+                      {col === 'siteName' ? 'Site Name' : col === 'siteType' ? 'Site Type' : col === 'customerSiteId' ? 'Customer Site ID' : col === 'siteReferenceId' ? 'Site Reference ID' : col === 'modifiedBy' ? 'Modified By' : col === 'ziPartner' ? 'ZI Partner' : col.charAt(0).toUpperCase() + col.slice(1)}
+                      <SortIcon column={col} />
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data.map((station) => (
+                {sorted.map((station) => (
                   <TableRow
                     key={station.id}
                     hover

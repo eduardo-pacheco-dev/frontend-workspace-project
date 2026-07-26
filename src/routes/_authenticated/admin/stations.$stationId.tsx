@@ -1010,6 +1010,61 @@ function PhotosSection() {
   )
 }
 
+function MapSection() {
+  const s = station
+  const lat = Number(s.latitude)
+  const lng = Number(s.longitude)
+  const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.02},${lat - 0.02},${lng + 0.02},${lat + 0.02}&layer=mapnik&marker=${lat},${lng}`
+
+  return (
+    <Card>
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Location Map
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {s.latitude}, {s.longitude} · {s.siteAddress}
+            </Typography>
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            width: '100%',
+            height: 480,
+            borderRadius: 2,
+            overflow: 'hidden',
+            border: 1,
+            borderColor: 'divider',
+            '& iframe': { width: '100%', height: '100%', border: 0 },
+          }}
+        >
+          <iframe
+            src={mapSrc}
+            title="Station Location"
+            loading="lazy"
+            allowFullScreen
+          />
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
+          {[
+            { label: 'Latitude', value: s.latitude },
+            { label: 'Longitude', value: s.longitude },
+            { label: 'Country', value: s.country },
+            { label: 'Timezone', value: s.timezone },
+          ].map((item) => (
+            <Box key={item.label} sx={{ minWidth: 140 }}>
+              <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.value}</Typography>
+            </Box>
+          ))}
+        </Box>
+      </CardContent>
+    </Card>
+  )
+}
+
 function StationDetailPage() {
   const [data, setData] = useState(station)
   const [editOpen, setEditOpen] = useState(false)
@@ -1048,6 +1103,7 @@ function StationDetailPage() {
         <Tab label="P20 Site Details" />
         <Tab label="Documents" />
         <Tab label="Photos" />
+        <Tab label="Map" />
       </Tabs>
 
       {tab === 0 && (
@@ -1202,6 +1258,8 @@ function StationDetailPage() {
       )}
 
       {tab === 6 && <PhotosSection />}
+
+      {tab === 7 && <MapSection />}
 
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
         <DialogTitle sx={{ fontWeight: 700 }}>Edit Station</DialogTitle>

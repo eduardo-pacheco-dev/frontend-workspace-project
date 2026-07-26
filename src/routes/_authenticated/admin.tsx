@@ -102,6 +102,18 @@ const apps: AppItem[] = [
     ),
   },
   {
+    id: 'stations',
+    name: 'Stations',
+    route: '/admin/stations',
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z" />
+        <path d="M2 12h20" />
+      </svg>
+    ),
+  },
+  {
     id: 'support',
     name: 'Support',
     route: '/admin/support',

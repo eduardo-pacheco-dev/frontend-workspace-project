@@ -1096,6 +1096,7 @@ function CommentsSection() {
   const [newComment, setNewComment] = useState('')
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editText, setEditText] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState<Comment | null>(null)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -1190,7 +1191,7 @@ function CommentsSection() {
                   <Button size="small" variant="text" sx={{ borderRadius: 999, minWidth: 0, px: 1, fontSize: 12 }} onClick={() => handleEdit(comment)}>
                     Edit
                   </Button>
-                  <Button size="small" variant="text" color="error" sx={{ borderRadius: 999, minWidth: 0, px: 1, fontSize: 12 }} onClick={() => handleDelete(comment.id)}>
+                  <Button size="small" variant="text" color="error" sx={{ borderRadius: 999, minWidth: 0, px: 1, fontSize: 12 }} onClick={() => setDeleteTarget(comment)}>
                     Delete
                   </Button>
                 </Box>
@@ -1199,6 +1200,24 @@ function CommentsSection() {
           ))}
         </Stack>
       </CardContent>
+
+      <Dialog open={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Delete Comment</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Are you sure you want to delete this comment?
+          </Typography>
+          {deleteTarget && (
+            <Box sx={{ mt: 1.5, p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
+              <Typography variant="body2" sx={{ fontStyle: 'italic' }}>"{deleteTarget.text}"</Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setDeleteTarget(null)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" color="error" sx={{ borderRadius: 999 }} onClick={() => { if (deleteTarget) handleDelete(deleteTarget.id); setDeleteTarget(null) }}>Delete</Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   )
 }

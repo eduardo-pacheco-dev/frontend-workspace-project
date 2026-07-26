@@ -14,6 +14,8 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import TextField from '@mui/material/TextField'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 import { useTheme } from '@mui/material/styles'
 import { useAuth } from '../../../lib/auth'
 
@@ -42,17 +44,22 @@ function ProfilePage() {
   const theme = useTheme()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteEmail, setDeleteEmail] = useState('')
+  const [editOpen, setEditOpen] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [profileUser, setProfileUser] = useState(user)
+  const [snack, setSnack] = useState({ open: false, message: '' })
 
   return (
     <Box>
       <Box sx={{ maxWidth: 960, mx: 'auto', px: 2, py: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4, flexWrap: 'wrap' }}>
           <Avatar sx={{ width: 72, height: 72, bgcolor: theme.palette.primary.main, fontSize: 28, fontWeight: 700 }}>
-            {user?.name.charAt(0).toUpperCase()}
+            {profileUser?.name.charAt(0).toUpperCase()}
           </Avatar>
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700 }}>{user?.name}</Typography>
-            <Typography variant="body1" color="text.secondary">{user?.email}</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 700 }}>{profileUser?.name}</Typography>
+            <Typography variant="body1" color="text.secondary">{profileUser?.email}</Typography>
           </Box>
         </Box>
 
@@ -60,14 +67,19 @@ function ProfilePage() {
           <Grid size={{ xs: 12, md: 6 }}>
             <Card>
               <CardContent sx={{ p: 3 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-                  User Details
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                    User Details
+                  </Typography>
+                  <Button size="small" variant="outlined" sx={{ borderRadius: 999 }} onClick={() => { setEditName(profileUser?.name ?? ''); setEditEmail(profileUser?.email ?? ''); setEditOpen(true) }}>
+                    Edit
+                  </Button>
+                </Box>
                 <Stack spacing={2}>
                   {[
-                    { label: 'Name', value: user?.name },
-                    { label: 'Email', value: user?.email },
-                    { label: 'User ID', value: user?.id },
+                    { label: 'Name', value: profileUser?.name },
+                    { label: 'Email', value: profileUser?.email },
+                    { label: 'User ID', value: profileUser?.id },
                     { label: 'Role', value: 'Administrator' },
                     { label: 'Status', value: 'Active' },
                   ].map((item) => (
@@ -156,6 +168,28 @@ function ProfilePage() {
         </Grid>
       </Box>
 
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Edit Profile</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2.5} sx={{ mt: 1 }}>
+            <TextField label="Name" fullWidth size="small" value={editName} onChange={(e) => setEditName(e.target.value)} />
+            <TextField label="Email" fullWidth size="small" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setEditOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} onClick={() => {
+            setProfileUser((prev) => prev ? { ...prev, name: editName, email: editEmail } : prev)
+            setEditOpen(false)
+            setSnack({ open: true, message: 'Profile updated successfully.' })
+          }}>Save</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={snack.open} autoHideDuration={3000} onClose={() => setSnack({ open: false, message: '' })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity="success" variant="filled" sx={{ borderRadius: 2 }}>{snack.message}</Alert>
+      </Snackbar>
+
       <Dialog open={deleteOpen} onClose={() => { setDeleteOpen(false); setDeleteEmail('') }} maxWidth="xs" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
         <DialogTitle sx={{ fontWeight: 700, color: 'error.main' }}>Delete Account</DialogTitle>
         <DialogContent>
@@ -168,13 +202,13 @@ function ProfilePage() {
             size="small"
             value={deleteEmail}
             onChange={(e) => setDeleteEmail(e.target.value)}
-            placeholder={user?.email}
+            placeholder={profileUser?.email}
             autoFocus
           />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button onClick={() => { setDeleteOpen(false); setDeleteEmail('') }} sx={{ borderRadius: 999 }}>Cancel</Button>
-          <Button variant="contained" color="error" sx={{ borderRadius: 999 }} disabled={deleteEmail !== user?.email} onClick={() => { setDeleteOpen(false); setDeleteEmail('') }}>Delete</Button>
+          <Button variant="contained" color="error" sx={{ borderRadius: 999 }} disabled={deleteEmail !== profileUser?.email} onClick={() => { setDeleteOpen(false); setDeleteEmail('') }}>Delete</Button>
         </DialogActions>
       </Dialog>
 

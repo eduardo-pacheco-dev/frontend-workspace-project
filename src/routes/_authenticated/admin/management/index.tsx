@@ -302,6 +302,29 @@ function ManagementPage() {
       <Snackbar open={snack.open} autoHideDuration={3000} onClose={() => setSnack({ open: false, message: '' })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         <Alert severity="success" variant="filled" sx={{ borderRadius: 2 }}>{snack.message}</Alert>
       </Snackbar>
+
+      <Box
+        component="footer"
+        sx={{
+          mt: 6,
+          pt: 3,
+          pb: 2,
+          borderTop: 1,
+          borderColor: 'divider',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 1,
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          &copy; {new Date().getFullYear()} Your Company. All rights reserved.
+        </Typography>
+        <Typography variant="caption" color="text.disabled">
+          {companies.length} companies registered
+        </Typography>
+      </Box>
     </Box>
   )
 }

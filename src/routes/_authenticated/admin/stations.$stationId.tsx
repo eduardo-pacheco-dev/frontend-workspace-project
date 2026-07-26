@@ -717,43 +717,170 @@ function DocumentsSection() {
   )
 }
 
-const photos = [
-  { id: 1, src: 'https://picsum.photos/seed/station1/400/300', title: 'Site Overview', date: '2026-04-01' },
-  { id: 2, src: 'https://picsum.photos/seed/station2/400/300', title: 'Equipment Room', date: '2026-04-01' },
-  { id: 3, src: 'https://picsum.photos/seed/station3/400/300', title: 'Antenna Installation', date: '2026-03-28' },
-  { id: 4, src: 'https://picsum.photos/seed/station4/400/300', title: 'Cabling', date: '2026-03-28' },
-  { id: 5, src: 'https://picsum.photos/seed/station5/400/300', title: 'Power Supply', date: '2026-03-25' },
-  { id: 6, src: 'https://picsum.photos/seed/station6/400/300', title: 'Cooling System', date: '2026-03-25' },
-  { id: 7, src: 'https://picsum.photos/seed/station7/400/300', title: 'Security Setup', date: '2026-03-20' },
-  { id: 8, src: 'https://picsum.photos/seed/station8/400/300', title: 'Site Entrance', date: '2026-03-20' },
+interface PhotoAlbum {
+  id: string
+  name: string
+  photos: { id: number; src: string; title: string; date: string }[]
+}
+
+const albums: PhotoAlbum[] = [
+  {
+    id: 'site-visit',
+    name: 'Site Visit',
+    photos: [
+      { id: 1, src: 'https://picsum.photos/seed/station1/400/300', title: 'Site Overview', date: '2026-04-01' },
+      { id: 2, src: 'https://picsum.photos/seed/station2/400/300', title: 'Entrance Gate', date: '2026-04-01' },
+      { id: 3, src: 'https://picsum.photos/seed/station9/400/300', title: 'Perimeter View', date: '2026-04-01' },
+      { id: 4, src: 'https://picsum.photos/seed/station10/400/300', title: 'Access Road', date: '2026-04-01' },
+    ],
+  },
+  {
+    id: 'equipment',
+    name: 'Equipment',
+    photos: [
+      { id: 5, src: 'https://picsum.photos/seed/station3/400/300', title: 'Antenna Installation', date: '2026-03-28' },
+      { id: 6, src: 'https://picsum.photos/seed/station4/400/300', title: 'Cabling', date: '2026-03-28' },
+      { id: 7, src: 'https://picsum.photos/seed/station5/400/300', title: 'Power Supply', date: '2026-03-25' },
+      { id: 8, src: 'https://picsum.photos/seed/station6/400/300', title: 'Cooling System', date: '2026-03-25' },
+      { id: 9, src: 'https://picsum.photos/seed/station11/400/300', title: 'Rack Setup', date: '2026-03-25' },
+    ],
+  },
+  {
+    id: 'security',
+    name: 'Security',
+    photos: [
+      { id: 10, src: 'https://picsum.photos/seed/station7/400/300', title: 'Security Setup', date: '2026-03-20' },
+      { id: 11, src: 'https://picsum.photos/seed/station8/400/300', title: 'Site Entrance', date: '2026-03-20' },
+      { id: 12, src: 'https://picsum.photos/seed/station12/400/300', title: 'Camera View', date: '2026-03-20' },
+    ],
+  },
 ]
+
+const PHOTOS_PER_PAGE = 4
 
 function PhotosSection() {
   const [preview, setPreview] = useState<{ src: string; title: string; date: string } | null>(null)
+  const [searchPhoto, setSearchPhoto] = useState('')
+  const [expandedAlbums, setExpandedAlbums] = useState<Record<string, boolean>>({})
+  const [pages, setPages] = useState<Record<string, number>>({})
+
+  function toggleAlbum(id: string) {
+    setExpandedAlbums((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  function setPage(id: string, page: number) {
+    setPages((prev) => ({ ...prev, [id]: page }))
+  }
+
+  const filtered = albums.map((album) => ({
+    ...album,
+    photos: album.photos.filter((p) =>
+      !searchPhoto || p.title.toLowerCase().includes(searchPhoto.toLowerCase()),
+    ),
+  })).filter((a) => a.photos.length > 0)
 
   return (
     <>
       <Card>
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
               Photos
             </Typography>
-            <Button variant="contained" size="small" sx={{ borderRadius: 999 }}>
-              Upload Photos
-            </Button>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                placeholder="Search photos..."
+                size="small"
+                value={searchPhoto}
+                onChange={(e) => setSearchPhoto(e.target.value)}
+                sx={{ minWidth: 200 }}
+              />
+              <Button variant="contained" size="small" sx={{ borderRadius: 999, flexShrink: 0 }}>
+                Upload Photos
+              </Button>
+            </Box>
           </Box>
-          <ImageList cols={4} gap={16} sx={{ m: 0 }}>
-            {photos.map((photo) => (
-              <ImageListItem key={photo.id} sx={{ cursor: 'pointer', borderRadius: 2, overflow: 'hidden' }} onClick={() => setPreview(photo)}>
-                <img src={photo.src} alt={photo.title} loading="lazy" style={{ display: 'block', width: '100%', height: 180, objectFit: 'cover' }} />
-                <Box sx={{ p: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 13 }}>{photo.title}</Typography>
-                  <Typography variant="caption" color="text.secondary">{photo.date}</Typography>
+
+          {filtered.length === 0 && (
+            <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+              No photos found.
+            </Typography>
+          )}
+
+          {filtered.map((album) => {
+            const totalPages = Math.ceil(album.photos.length / PHOTOS_PER_PAGE)
+            const page = pages[album.id] ?? 0
+            const visible = album.photos.slice(page * PHOTOS_PER_PAGE, (page + 1) * PHOTOS_PER_PAGE)
+            const isOpen = expandedAlbums[album.id] ?? true
+
+            return (
+              <Box key={album.id} sx={{ mb: 3 }}>
+                <Box
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, cursor: 'pointer' }}
+                  onClick={() => toggleAlbum(album.id)}
+                >
+                  <Box
+                    component="span"
+                    sx={{
+                      display: 'flex',
+                      transition: 'transform 0.15s',
+                      transform: isOpen ? 'rotate(90deg)' : 'none',
+                      color: 'text.disabled',
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </Box>
+                  <Box component="span" sx={{ color: 'warning.main', display: 'flex' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{album.name}</Typography>
+                  <Typography variant="caption" color="text.disabled">({album.photos.length})</Typography>
                 </Box>
-              </ImageListItem>
-            ))}
-          </ImageList>
+
+                {isOpen && (
+                  <>
+                    <ImageList cols={4} gap={12} sx={{ m: 0 }}>
+                      {visible.map((photo) => (
+                        <ImageListItem key={photo.id} sx={{ cursor: 'pointer', borderRadius: 2, overflow: 'hidden' }} onClick={() => setPreview(photo)}>
+                          <img src={photo.src} alt={photo.title} loading="lazy" style={{ display: 'block', width: '100%', height: 160, objectFit: 'cover' }} />
+                          <Box sx={{ p: 1 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 13 }}>{photo.title}</Typography>
+                            <Typography variant="caption" color="text.secondary">{photo.date}</Typography>
+                          </Box>
+                        </ImageListItem>
+                      ))}
+                    </ImageList>
+
+                    {totalPages > 1 && (
+                      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, mt: 1.5 }}>
+                        <Button size="small" variant="text" sx={{ borderRadius: 999, minWidth: 0 }} disabled={page === 0} onClick={() => setPage(album.id, page - 1)}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><polyline points="15 18 9 12 15 6" /></svg>
+                        </Button>
+                        {Array.from({ length: totalPages }, (_, i) => (
+                          <Button
+                            key={i}
+                            size="small"
+                            variant={page === i ? 'contained' : 'text'}
+                            sx={{ borderRadius: 999, minWidth: 32, height: 32, p: 0 }}
+                            onClick={() => setPage(album.id, i)}
+                          >
+                            {i + 1}
+                          </Button>
+                        ))}
+                        <Button size="small" variant="text" sx={{ borderRadius: 999, minWidth: 0 }} disabled={page >= totalPages - 1} onClick={() => setPage(album.id, page + 1)}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><polyline points="9 18 15 12 9 6" /></svg>
+                        </Button>
+                      </Box>
+                    )}
+                  </>
+                )}
+              </Box>
+            )
+          })}
         </CardContent>
       </Card>
 

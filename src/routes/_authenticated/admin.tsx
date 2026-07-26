@@ -103,6 +103,7 @@ function AdminPage() {
   const theme = useTheme()
   const [appMenuAnchor, setAppMenuAnchor] = useState<HTMLElement | null>(null)
   const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(null)
+  const [notifMenuAnchor, setNotifMenuAnchor] = useState<HTMLElement | null>(null)
   const userMenuOpen = Boolean(userMenuAnchor)
 
   return (
@@ -184,7 +185,10 @@ function AdminPage() {
           </Typography>
 
           <Tooltip title="Notifications">
-            <IconButton sx={{ mr: 1 }}>
+            <IconButton
+              sx={{ mr: 1 }}
+              onClick={(e) => setNotifMenuAnchor(e.currentTarget)}
+            >
               <Badge badgeContent={3} color="error">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -193,6 +197,92 @@ function AdminPage() {
               </Badge>
             </IconButton>
           </Tooltip>
+
+          <Menu
+            anchorEl={notifMenuAnchor}
+            open={Boolean(notifMenuAnchor)}
+            onClose={() => setNotifMenuAnchor(null)}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            slotProps={{ paper: { sx: { mt: 1, minWidth: 320, borderRadius: 2, maxHeight: 360 } } }}
+          >
+            <Box sx={{ px: 2, py: 1.5 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                Notifications
+              </Typography>
+            </Box>
+            <Divider />
+            {[
+              {
+                title: 'New user registered',
+                description: 'John Doe created an account',
+                time: '2 min ago',
+                unread: true,
+              },
+              {
+                title: 'Server alert',
+                description: 'CPU usage exceeded 90% on prod-01',
+                time: '15 min ago',
+                unread: true,
+              },
+              {
+                title: 'Weekly report ready',
+                description: 'Download your analytics summary',
+                time: '1 hour ago',
+                unread: false,
+              },
+              {
+                title: 'Deployment successful',
+                description: 'v2.4.1 deployed to production',
+                time: '3 hours ago',
+                unread: false,
+              },
+            ].map((notif, i) => (
+              <MenuItem
+                key={i}
+                sx={{ px: 2, py: 1.5, alignItems: 'flex-start', flexDirection: 'column' }}
+                onClick={() => setNotifMenuAnchor(null)}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                  {notif.unread && (
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        bgcolor: 'primary.main',
+                        flexShrink: 0,
+                        mt: 0.5,
+                      }}
+                    />
+                  )}
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: notif.unread ? 700 : 400 }}
+                    >
+                      {notif.title}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {notif.description}
+                    </Typography>
+                  </Box>
+                  <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0 }}>
+                    {notif.time}
+                  </Typography>
+                </Box>
+              </MenuItem>
+            ))}
+            <Divider />
+            <MenuItem
+              sx={{ justifyContent: 'center', py: 1 }}
+              onClick={() => setNotifMenuAnchor(null)}
+            >
+              <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>
+                View all notifications
+              </Typography>
+            </MenuItem>
+          </Menu>
 
           <Tooltip title="Account">
             <IconButton onClick={(e) => setUserMenuAnchor(e.currentTarget)}>

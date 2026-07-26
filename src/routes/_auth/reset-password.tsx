@@ -1,5 +1,12 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useState } from 'react'
+import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import Alert from '@mui/material/Alert'
+import Stack from '@mui/material/Stack'
+import Box from '@mui/material/Box'
+import LinkMui from '@mui/material/Link'
 import { useAuth } from '../../lib/auth'
 
 export const Route = createFileRoute('/_auth/reset-password')({
@@ -40,73 +47,73 @@ function ResetPasswordPage() {
 
   return (
     <>
-      <h1 className="mb-1 text-2xl font-bold text-[var(--sea-ink)]">Set new password</h1>
-      <p className="mb-6 text-sm text-[var(--sea-ink-soft)]">
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+        Set new password
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Choose a new password for your account.
-      </p>
+      </Typography>
 
       {error && (
-        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+        <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
           {error}
-        </p>
+        </Alert>
       )}
 
       {!token && (
-        <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+        <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }}>
           Invalid or missing reset token.
-        </p>
+        </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="password" className="mb-1 block text-sm font-medium text-[var(--sea-ink)]">
-            New password
-          </label>
-          <input
-            id="password"
+      <Box component="form" onSubmit={handleSubmit}>
+        <Stack spacing={2.5}>
+          <TextField
+            label="New password"
             type="password"
             required
-            minLength={6}
+            fullWidth
+            size="medium"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-sm text-[var(--sea-ink)] outline-none focus:border-[rgba(79,184,178,0.5)] focus:ring-2 focus:ring-[rgba(79,184,178,0.2)]"
             placeholder="······"
           />
-        </div>
-
-        <div>
-          <label htmlFor="confirm" className="mb-1 block text-sm font-medium text-[var(--sea-ink)]">
-            Confirm password
-          </label>
-          <input
-            id="confirm"
+          <TextField
+            label="Confirm password"
             type="password"
             required
-            minLength={6}
+            fullWidth
+            size="medium"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
-            className="w-full rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-sm text-[var(--sea-ink)] outline-none focus:border-[rgba(79,184,178,0.5)] focus:ring-2 focus:ring-[rgba(79,184,178,0.2)]"
             placeholder="······"
           />
-        </div>
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            disabled={isLoading || !token}
+            sx={{ py: 1.5 }}
+          >
+            {isLoading ? 'Resetting…' : 'Reset password'}
+          </Button>
+        </Stack>
+      </Box>
 
-        <button
-          type="submit"
-          disabled={isLoading || !token}
-          className="w-full rounded-xl bg-[rgba(79,184,178,0.9)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[rgba(79,184,178,1)] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isLoading ? 'Resetting…' : 'Reset password'}
-        </button>
-      </form>
-
-      <p className="mt-6 text-center text-sm text-[var(--sea-ink-soft)]">
-        <Link
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ textAlign: 'center', mt: 4 }}
+      >
+        <LinkMui
+          component={Link}
           to="/login"
-          className="font-medium text-[rgba(79,184,178,0.9)] hover:text-[rgba(79,184,178,1)]"
+          sx={{ fontWeight: 600 }}
+          underline="hover"
         >
           Back to sign in
-        </Link>
-      </p>
+        </LinkMui>
+      </Typography>
     </>
   )
 }

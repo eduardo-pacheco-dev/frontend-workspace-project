@@ -1,5 +1,12 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useState } from 'react'
+import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import Alert from '@mui/material/Alert'
+import Stack from '@mui/material/Stack'
+import Box from '@mui/material/Box'
+import LinkMui from '@mui/material/Link'
 import { useAuth } from '../../lib/auth'
 
 export const Route = createFileRoute('/_auth/login')({
@@ -26,75 +33,78 @@ function LoginPage() {
 
   return (
     <>
-      <h1 className="mb-1 text-2xl font-bold text-[var(--sea-ink)]">Sign in</h1>
-      <p className="mb-6 text-sm text-[var(--sea-ink-soft)]">
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+        Sign in
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Enter your credentials to access your account.
-      </p>
+      </Typography>
 
       {error && (
-        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+        <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
           {error}
-        </p>
+        </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="mb-1 block text-sm font-medium text-[var(--sea-ink)]">
-            Email
-          </label>
-          <input
-            id="email"
+      <Box component="form" onSubmit={handleSubmit}>
+        <Stack spacing={2.5}>
+          <TextField
+            label="Email"
             type="email"
             required
+            fullWidth
+            size="medium"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-sm text-[var(--sea-ink)] outline-none focus:border-[rgba(79,184,178,0.5)] focus:ring-2 focus:ring-[rgba(79,184,178,0.2)]"
             placeholder="you@example.com"
           />
-        </div>
-
-        <div>
-          <label htmlFor="password" className="mb-1 block text-sm font-medium text-[var(--sea-ink)]">
-            Password
-          </label>
-          <input
-            id="password"
+          <TextField
+            label="Password"
             type="password"
             required
+            fullWidth
+            size="medium"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-sm text-[var(--sea-ink)] outline-none focus:border-[rgba(79,184,178,0.5)] focus:ring-2 focus:ring-[rgba(79,184,178,0.2)]"
             placeholder="······"
           />
-        </div>
-
-        <div className="flex items-center justify-end">
-          <Link
-            to="/forgot-password"
-            className="text-sm text-[rgba(79,184,178,0.9)] hover:text-[rgba(79,184,178,1)]"
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <LinkMui
+              component={Link}
+              to="/forgot-password"
+              variant="body2"
+              underline="hover"
+            >
+              Forgot password?
+            </LinkMui>
+          </Box>
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            disabled={isLoading}
+            sx={{ py: 1.5 }}
           >
-            Forgot password?
-          </Link>
-        </div>
+            {isLoading ? 'Signing in…' : 'Sign in'}
+          </Button>
+        </Stack>
+      </Box>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full rounded-xl bg-[rgba(79,184,178,0.9)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[rgba(79,184,178,1)] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isLoading ? 'Signing in…' : 'Sign in'}
-        </button>
-      </form>
-
-      <p className="mt-6 text-center text-sm text-[var(--sea-ink-soft)]">
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ textAlign: 'center', mt: 4 }}
+      >
         Don&apos;t have an account?{' '}
-        <Link
+        <LinkMui
+          component={Link}
           to="/register"
-          className="font-medium text-[rgba(79,184,178,0.9)] hover:text-[rgba(79,184,178,1)]"
+          sx={{ fontWeight: 600 }}
+          underline="hover"
         >
           Create one
-        </Link>
-      </p>
+        </LinkMui>
+      </Typography>
     </>
   )
 }

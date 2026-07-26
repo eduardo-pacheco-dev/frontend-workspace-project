@@ -1,4 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import Typography from '@mui/material/Typography'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Button from '@mui/material/Button'
+import Stack from '@mui/material/Stack'
+import Box from '@mui/material/Box'
+import { useTheme } from '@mui/material/styles'
 import { useAuth } from '../../lib/auth'
 
 export const Route = createFileRoute('/_authenticated/profile')({
@@ -7,45 +14,72 @@ export const Route = createFileRoute('/_authenticated/profile')({
 
 function ProfilePage() {
   const { user, logout } = useAuth()
+  const theme = useTheme()
 
   return (
-    <main className="page-wrap px-4 py-12">
-      <section className="island-shell rounded-2xl p-6 sm:p-8">
-        <p className="island-kicker mb-2">Profile</p>
-        <h1 className="mb-6 text-3xl font-bold text-[var(--sea-ink)]">
-          Welcome, {user?.name}
-        </h1>
+    <Box sx={{ maxWidth: 640, mx: 'auto', px: 2, py: 6 }}>
+      <Typography
+        variant="overline"
+        sx={{ letterSpacing: '0.16em', color: theme.palette.secondary.main }}
+      >
+        Profile
+      </Typography>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 4 }}>
+        Welcome, {user?.name}
+      </Typography>
 
-        <div className="mb-6 space-y-3">
-          <div className="rounded-xl border border-[var(--line)] bg-white px-4 py-3">
-            <p className="text-xs text-[var(--sea-ink-soft)]">Name</p>
-            <p className="text-sm font-medium text-[var(--sea-ink)]">{user?.name}</p>
-          </div>
-          <div className="rounded-xl border border-[var(--line)] bg-white px-4 py-3">
-            <p className="text-xs text-[var(--sea-ink-soft)]">Email</p>
-            <p className="text-sm font-medium text-[var(--sea-ink)]">{user?.email}</p>
-          </div>
-          <div className="rounded-xl border border-[var(--line)] bg-white px-4 py-3">
-            <p className="text-xs text-[var(--sea-ink-soft)]">User ID</p>
-            <p className="text-sm font-medium text-[var(--sea-ink)] font-mono">{user?.id}</p>
-          </div>
-        </div>
+      <Card sx={{ mb: 4 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Stack spacing={2}>
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Name
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                {user?.name}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                Email
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                {user?.email}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                User ID
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: 500, fontFamily: 'monospace' }}
+              >
+                {user?.id}
+              </Typography>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
 
-        <div className="flex flex-wrap gap-3">
-          <Link
-            to="/"
-            className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-5 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
-          >
-            Home
-          </Link>
-          <button
-            onClick={logout}
-            className="rounded-full border border-red-200 bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:-translate-y-0.5 hover:bg-red-100"
-          >
-            Sign out
-          </button>
-        </div>
-      </section>
-    </main>
+      <Stack direction="row" spacing={2}>
+        <Button
+          component={Link}
+          to="/"
+          variant="outlined"
+          sx={{ borderRadius: 999 }}
+        >
+          Home
+        </Button>
+        <Button
+          onClick={logout}
+          variant="outlined"
+          color="error"
+          sx={{ borderRadius: 999 }}
+        >
+          Sign out
+        </Button>
+      </Stack>
+    </Box>
   )
 }

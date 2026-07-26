@@ -1,4 +1,6 @@
 import { createFileRoute, redirect, Outlet } from '@tanstack/react-router'
+import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
 import { getAuthState } from '../lib/auth'
 
 export const Route = createFileRoute('/_auth')({
@@ -11,10 +13,19 @@ export const Route = createFileRoute('/_auth')({
 
 function AuthLayout() {
   return (
-    <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
-      <div className="island-shell w-full max-w-md rounded-2xl p-6 sm:p-8">
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: 'calc(100vh - 64px)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 2,
+        py: 6,
+      }}
+    >
+      <Card sx={{ width: '100%', maxWidth: 440, p: { xs: 3, sm: 4 } }}>
         <Outlet />
-      </div>
-    </main>
+      </Card>
+    </Box>
   )
 }

@@ -1,9 +1,20 @@
 import { createFileRoute, useNavigate, Outlet, useMatches } from '@tanstack/react-router'
+import { useState } from 'react'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Box from '@mui/material/Box'
+import Grid from '@mui/material/Grid'
 import Chip from '@mui/material/Chip'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -43,6 +54,10 @@ function StationsPage() {
   const navigate = useNavigate()
   const matches = useMatches()
   const isChildMatch = matches.some((m) => m.routeId === '/_authenticated/admin/stations/$stationId')
+  const [data, setData] = useState(stations)
+  const [createOpen, setCreateOpen] = useState(false)
+  const [newStation, setNewStation] = useState<Record<string, string>>({})
+  const [snack, setSnack] = useState({ open: false, message: '' })
 
   if (isChildMatch) {
     return <Outlet />
@@ -50,12 +65,19 @@ function StationsPage() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-        Stations
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Manage all registered stations and sites.
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+            Stations
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Manage all registered stations and sites.
+          </Typography>
+        </Box>
+        <Button variant="contained" sx={{ borderRadius: 999, flexShrink: 0 }} onClick={() => setCreateOpen(true)}>
+          Create
+        </Button>
+      </Box>
 
       <Card>
         <CardContent sx={{ p: 3 }}>
@@ -74,7 +96,7 @@ function StationsPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {stations.map((station) => (
+                {data.map((station) => (
                   <TableRow
                     key={station.id}
                     hover
@@ -108,7 +130,7 @@ function StationsPage() {
           </TableContainer>
           <TablePagination
             component="div"
-            count={stations.length}
+            count={data.length}
             page={0}
             rowsPerPage={10}
             rowsPerPageOptions={[5, 10, 25]}
@@ -117,6 +139,52 @@ function StationsPage() {
           />
         </CardContent>
       </Card>
+
+      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Create Station</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+            {[
+              ['siteName', 'Site Name'],
+              ['siteType', 'Site Type'],
+              ['customerSiteId', 'Customer Site ID'],
+              ['siteReferenceId', 'Site Reference ID'],
+              ['customer', 'Customer'],
+              ['status', 'Status'],
+              ['modifiedBy', 'Modified By'],
+              ['ziPartner', 'ZI Partner'],
+            ].map(([field, label]) => (
+              <Grid size={{ xs: 12, sm: 6 }} key={field}>
+                {field === 'status' ? (
+                  <TextField label={label} fullWidth size="small" select value={newStation[field] ?? ''} onChange={(e) => setNewStation({ ...newStation, [field]: e.target.value })}>
+                    {['Active', 'Inactive', 'Pending'].map((o) => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+                  </TextField>
+                ) : (
+                  <TextField label={label} fullWidth size="small" value={newStation[field] ?? ''} onChange={(e) => setNewStation({ ...newStation, [field]: e.target.value })} />
+                )}
+              </Grid>
+            ))}
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setCreateOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} onClick={() => {
+            const nextId = Math.max(...data.map((d) => d.id), 0) + 1
+            setData([...data, {
+              id: nextId, status: '', siteName: '', siteType: '', customerSiteId: '',
+              siteReferenceId: '', customer: '', modifiedBy: '', ziPartner: '',
+              ...newStation,
+            }])
+            setCreateOpen(false)
+            setNewStation({})
+            setSnack({ open: true, message: 'Station created successfully.' })
+          }}>Create</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={snack.open} autoHideDuration={3000} onClose={() => setSnack({ open: false, message: '' })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity="success" variant="filled" sx={{ borderRadius: 2 }}>{snack.message}</Alert>
+      </Snackbar>
     </Box>
   )
 }

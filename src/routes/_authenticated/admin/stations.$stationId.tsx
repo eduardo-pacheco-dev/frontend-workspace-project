@@ -295,6 +295,10 @@ function TreeNodeRow({
   const [renameOpen, setRenameOpen] = useState(false)
   const [renameValue, setRenameValue] = useState('')
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [subFolderOpen, setSubFolderOpen] = useState(false)
+  const [subFolderValue, setSubFolderValue] = useState('')
+  const [subFileOpen, setSubFileOpen] = useState(false)
+  const [subFileValue, setSubFileValue] = useState('')
   const folder = isFolder(node)
   const indent = depth * 4
 
@@ -302,14 +306,11 @@ function TreeNodeRow({
     e.stopPropagation()
     setMenuEl(null)
     if (action === 'add-folder') {
-      const name = prompt('Folder name:')
-      if (name) onAdd(node.id, { id: newId(), name, children: [] })
+      setSubFolderValue('')
+      setSubFolderOpen(true)
     } else if (action === 'add-file') {
-      const name = prompt('File name (with extension):')
-      if (name) {
-        const ext = name.split('.').pop()?.toUpperCase() ?? 'FILE'
-        onAdd(node.id, { id: newId(), name, type: ext, date: new Date().toISOString().slice(0, 10), status: 'Pending' })
-      }
+      setSubFileValue('')
+      setSubFileOpen(true)
     } else if (action === 'rename') {
       setRenameValue(node.name)
       setRenameOpen(true)
@@ -501,6 +502,28 @@ function TreeNodeRow({
         </DialogActions>
       </Dialog>
 
+      <Dialog open={subFolderOpen} onClose={() => setSubFolderOpen(false)} maxWidth="xs" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>New Folder</DialogTitle>
+        <DialogContent>
+          <TextField autoFocus fullWidth size="small" label="Folder name" value={subFolderValue} onChange={(e) => setSubFolderValue(e.target.value)} sx={{ mt: 1 }} onKeyDown={(e) => { if (e.key === 'Enter' && subFolderValue.trim()) { onAdd(node.id, { id: newId(), name: subFolderValue.trim(), children: [] }); setSubFolderOpen(false) } }} />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setSubFolderOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} disabled={!subFolderValue.trim()} onClick={() => { onAdd(node.id, { id: newId(), name: subFolderValue.trim(), children: [] }); setSubFolderOpen(false) }}>Create</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={subFileOpen} onClose={() => setSubFileOpen(false)} maxWidth="xs" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>New File</DialogTitle>
+        <DialogContent>
+          <TextField autoFocus fullWidth size="small" label="File name (with extension)" value={subFileValue} onChange={(e) => setSubFileValue(e.target.value)} sx={{ mt: 1 }} onKeyDown={(e) => { if (e.key === 'Enter' && subFileValue.trim()) { const ext = subFileValue.split('.').pop()?.toUpperCase() ?? 'FILE'; onAdd(node.id, { id: newId(), name: subFileValue.trim(), type: ext, date: new Date().toISOString().slice(0, 10), status: 'Pending' }); setSubFileOpen(false) } }} />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setSubFileOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} disabled={!subFileValue.trim()} onClick={() => { const ext = subFileValue.split('.').pop()?.toUpperCase() ?? 'FILE'; onAdd(node.id, { id: newId(), name: subFileValue.trim(), type: ext, date: new Date().toISOString().slice(0, 10), status: 'Pending' }); setSubFileOpen(false) }}>Create</Button>
+        </DialogActions>
+      </Dialog>
+
       <Dialog
         open={renameOpen}
         onClose={() => setRenameOpen(false)}
@@ -547,6 +570,11 @@ function TreeNodeRow({
 
 function DocumentsSection() {
   const [tree, setTree] = useState(() => cloneTree(initialTree))
+  const [folderOpen, setFolderOpen] = useState(false)
+  const [folderName, setFolderName] = useState('')
+  const [uploadOpen, setUploadOpen] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
+  const [uploadFiles, setUploadFiles] = useState<File[]>([])
 
   function handleAdd(parentId: string, item: TreeNode) {
     setTree((prev) => {
@@ -577,6 +605,16 @@ function DocumentsSection() {
     })
   }
 
+  function processFiles(files: FileList | File[]) {
+    const items: TreeNode[] = Array.from(files).map((f) => {
+      const ext = f.name.split('.').pop()?.toUpperCase() ?? 'FILE'
+      return { id: newId(), name: f.name, type: ext, date: new Date().toISOString().slice(0, 10), status: 'Pending' }
+    })
+    items.forEach((item) => handleAdd((tree as FolderItem).id, item))
+    setUploadFiles([])
+    setUploadOpen(false)
+  }
+
   return (
     <Card>
       <CardContent sx={{ p: 3 }}>
@@ -585,19 +623,10 @@ function DocumentsSection() {
             Documents
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" size="small" sx={{ borderRadius: 999 }} onClick={() => {
-              const name = prompt('Folder name:')
-              if (name) handleAdd((tree as FolderItem).id, { id: newId(), name, children: [] })
-            }}>
+            <Button variant="outlined" size="small" sx={{ borderRadius: 999 }} onClick={() => { setFolderName(''); setFolderOpen(true) }}>
               New Folder
             </Button>
-            <Button variant="contained" size="small" sx={{ borderRadius: 999 }} onClick={() => {
-              const name = prompt('File name (with extension):')
-              if (name) {
-                const ext = name.split('.').pop()?.toUpperCase() ?? 'FILE'
-                handleAdd((tree as FolderItem).id, { id: newId(), name, type: ext, date: new Date().toISOString().slice(0, 10), status: 'Pending' })
-              }
-            }}>
+            <Button variant="contained" size="small" sx={{ borderRadius: 999 }} onClick={() => setUploadOpen(true)}>
               Upload
             </Button>
           </Box>
@@ -621,6 +650,67 @@ function DocumentsSection() {
           </Table>
         </TableContainer>
       </CardContent>
+
+      <Dialog open={folderOpen} onClose={() => setFolderOpen(false)} maxWidth="xs" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>New Folder</DialogTitle>
+        <DialogContent>
+          <TextField autoFocus fullWidth size="small" label="Folder name" value={folderName} onChange={(e) => setFolderName(e.target.value)} sx={{ mt: 1 }} onKeyDown={(e) => { if (e.key === 'Enter' && folderName.trim()) { handleAdd((tree as FolderItem).id, { id: newId(), name: folderName.trim(), children: [] }); setFolderOpen(false); setFolderName('') } }} />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setFolderOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} disabled={!folderName.trim()} onClick={() => { handleAdd((tree as FolderItem).id, { id: newId(), name: folderName.trim(), children: [] }); setFolderOpen(false); setFolderName('') }}>Create</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={uploadOpen} onClose={() => { setUploadOpen(false); setUploadFiles([]) }} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Upload Files</DialogTitle>
+        <DialogContent>
+          <Box
+            sx={{
+              mt: 1,
+              p: 4,
+              border: 2,
+              borderStyle: 'dashed',
+              borderRadius: 3,
+              borderColor: dragOver ? 'primary.main' : 'divider',
+              bgcolor: dragOver ? 'action.hover' : 'transparent',
+              transition: 'all 0.15s',
+              textAlign: 'center',
+              cursor: 'pointer',
+            }}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files.length) processFiles(e.dataTransfer.files) }}
+            onClick={() => document.getElementById('file-input')?.click()}
+          >
+            <input
+              id="file-input"
+              type="file"
+              multiple
+              hidden
+              onChange={(e) => { if (e.target.files?.length) processFiles(e.target.files) }}
+            />
+            <Box sx={{ color: 'text.disabled', mb: 1, display: 'flex', justifyContent: 'center' }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            </Box>
+            <Typography variant="body2" color="text.secondary">
+              Drag and drop files here, or click to select
+            </Typography>
+          </Box>
+          {uploadFiles.length > 0 && (
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              {uploadFiles.length} file(s) selected
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => { setUploadOpen(false); setUploadFiles([]) }} sx={{ borderRadius: 999 }}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   )
 }

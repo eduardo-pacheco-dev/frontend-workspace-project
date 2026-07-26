@@ -293,7 +293,7 @@ function TreeNodeRow({
   const [expanded, setExpanded] = useState(true)
   const [menuEl, setMenuEl] = useState<HTMLElement | null>(null)
   const folder = isFolder(node)
-  const indent = depth * 12
+  const indent = depth * 4
 
   function handleAction(e: React.MouseEvent, action: string) {
     e.stopPropagation()

@@ -68,6 +68,8 @@ function ManagementPage() {
   const [companies, setCompanies] = useState(mockCompanies.data)
   const [editOpen, setEditOpen] = useState(false)
   const [editing, setEditing] = useState<Company | null>(null)
+  const [createOpen, setCreating] = useState(false)
+  const [newCompany, setNewCompany] = useState<Partial<Company>>({})
   const [snack, setSnack] = useState({ open: false, message: '' })
   const first = companies[0]
   return (
@@ -124,9 +126,14 @@ function ManagementPage() {
         <Grid size={{ xs: 12 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-                All Companies
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  All Companies
+                </Typography>
+                <Button size="small" variant="contained" sx={{ borderRadius: 999 }} onClick={() => setCreating(true)}>
+                  Create
+                </Button>
+              </Box>
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -240,6 +247,55 @@ function ManagementPage() {
               setSnack({ open: true, message: 'Company updated successfully.' })
             }
           }}>Save</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={createOpen} onClose={() => setCreating(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Create Company</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField label="Legal Name" fullWidth size="small" value={newCompany.name ?? ''} onChange={(e) => setNewCompany({ ...newCompany, name: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField label="Trade Name" fullWidth size="small" value={newCompany.tradeName ?? ''} onChange={(e) => setNewCompany({ ...newCompany, tradeName: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField label="CNPJ" fullWidth size="small" value={newCompany.cnpj ?? ''} onChange={(e) => setNewCompany({ ...newCompany, cnpj: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField label="Opening Date" fullWidth size="small" type="date" value={newCompany.openingDate ?? ''} onChange={(e) => setNewCompany({ ...newCompany, openingDate: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField label="Company Size" fullWidth size="small" select value={newCompany.companySize ?? ''} onChange={(e) => setNewCompany({ ...newCompany, companySize: e.target.value })}>
+                {['LLC', 'Ltda', 'SA', 'Corporation', 'Individual'].map((o) => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+              </TextField>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField label="Registration Status" fullWidth size="small" select value={newCompany.registrationStatus ?? ''} onChange={(e) => setNewCompany({ ...newCompany, registrationStatus: e.target.value })}>
+                {['Active', 'Pending', 'Inactive'].map((o) => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+              </TextField>
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <TextField label="Address" fullWidth size="small" value={newCompany.address ?? ''} onChange={(e) => setNewCompany({ ...newCompany, address: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField label="Phone" fullWidth size="small" value={newCompany.phone ?? ''} onChange={(e) => setNewCompany({ ...newCompany, phone: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField label="Email" fullWidth size="small" type="email" value={newCompany.email ?? ''} onChange={(e) => setNewCompany({ ...newCompany, email: e.target.value })} />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setCreating(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} onClick={() => {
+            const nextId = Math.max(...companies.map((c) => c.id), 0) + 1
+            setCompanies([...companies, { id: nextId, name: '', tradeName: '', cnpj: '', openingDate: '', companySize: '', registrationStatus: '', address: '', phone: '', email: '', ...newCompany }])
+            setCreating(false)
+            setNewCompany({})
+            setSnack({ open: true, message: 'Company created successfully.' })
+          }}>Create</Button>
         </DialogActions>
       </Dialog>
 

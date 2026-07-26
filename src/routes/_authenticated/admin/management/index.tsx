@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -6,6 +7,15 @@ import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Stack from '@mui/material/Stack'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -55,6 +65,11 @@ export const Route = createFileRoute('/_authenticated/admin/management/')({
 
 function ManagementPage() {
   const navigate = useNavigate()
+  const [companies, setCompanies] = useState(mockCompanies.data)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editing, setEditing] = useState<Company | null>(null)
+  const [snack, setSnack] = useState({ open: false, message: '' })
+  const first = companies[0]
   return (
     <Box>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
@@ -71,37 +86,37 @@ function ManagementPage() {
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
                 Company Details
               </Typography>
-              {(() => {
-                const c = mockCompanies.data[0]
-                return (
-                  <Stack spacing={2}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-                      <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 700 }}>{c.name}</Typography>
-                        <Typography variant="body2" color="text.secondary">{c.tradeName} · {c.cnpj}</Typography>
-                      </Box>
-                      <Chip label={c.registrationStatus} size="small" color={c.registrationStatus === 'Active' ? 'success' : c.registrationStatus === 'Pending' ? 'warning' : 'default'} />
-                    </Box>
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
-                      {[
-                        { label: 'Opening Date', value: c.openingDate },
-                        { label: 'Company Size', value: c.companySize },
-                        { label: 'Email', value: c.email },
-                        { label: 'Phone', value: c.phone },
-                      ].map((item) => (
-                        <Box key={item.label}>
-                          <Typography variant="caption" color="text.secondary">{item.label}</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{item.value}</Typography>
-                        </Box>
-                      ))}
-                    </Box>
+              <Stack spacing={2}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
                     <Box>
-                      <Typography variant="caption" color="text.secondary">Address</Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>{c.address}</Typography>
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>{first.name}</Typography>
+                      <Typography variant="body2" color="text.secondary">{first.tradeName} · {first.cnpj}</Typography>
                     </Box>
-                  </Stack>
-                )
-              })()}
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Chip label={first.registrationStatus} size="small" color={first.registrationStatus === 'Active' ? 'success' : first.registrationStatus === 'Pending' ? 'warning' : 'default'} />
+                      <Button size="small" variant="outlined" sx={{ borderRadius: 999 }} onClick={() => { setEditing({ ...first }); setEditOpen(true) }}>
+                        Edit
+                      </Button>
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
+                    {[
+                      { label: 'Opening Date', value: first.openingDate },
+                      { label: 'Company Size', value: first.companySize },
+                      { label: 'Email', value: first.email },
+                      { label: 'Phone', value: first.phone },
+                    ].map((item) => (
+                      <Box key={item.label}>
+                        <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>{item.value}</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">Address</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>{first.address}</Typography>
+                  </Box>
+                </Stack>
             </CardContent>
           </Card>
         </Grid>
@@ -127,7 +142,7 @@ function ManagementPage() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {mockCompanies.data.map((company) => (
+                    {companies.map((company) => (
                       <TableRow
                         key={company.id}
                         hover
@@ -172,6 +187,65 @@ function ManagementPage() {
           </Card>
         </Grid>
       </Grid>
+
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Edit Company</DialogTitle>
+        {editing && (
+          <DialogContent>
+            <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Legal Name" fullWidth size="small" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Trade Name" fullWidth size="small" value={editing.tradeName} onChange={(e) => setEditing({ ...editing, tradeName: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="CNPJ" fullWidth size="small" value={editing.cnpj} onChange={(e) => setEditing({ ...editing, cnpj: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Opening Date" fullWidth size="small" type="date" value={editing.openingDate} onChange={(e) => setEditing({ ...editing, openingDate: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Company Size" fullWidth size="small" select value={editing.companySize} onChange={(e) => setEditing({ ...editing, companySize: e.target.value })}>
+                  {['LLC', 'Ltda', 'SA', 'Corporation', 'Individual'].map((opt) => (
+                    <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Registration Status" fullWidth size="small" select value={editing.registrationStatus} onChange={(e) => setEditing({ ...editing, registrationStatus: e.target.value })}>
+                  {['Active', 'Pending', 'Inactive'].map((opt) => (
+                    <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField label="Address" fullWidth size="small" value={editing.address} onChange={(e) => setEditing({ ...editing, address: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Phone" fullWidth size="small" value={editing.phone} onChange={(e) => setEditing({ ...editing, phone: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Email" fullWidth size="small" value={editing.email} onChange={(e) => setEditing({ ...editing, email: e.target.value })} />
+              </Grid>
+            </Grid>
+          </DialogContent>
+        )}
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setEditOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} onClick={() => {
+            if (editing) {
+              setCompanies((prev) => prev.map((c) => (c.id === editing.id ? editing : c)))
+              setEditOpen(false)
+              setSnack({ open: true, message: 'Company updated successfully.' })
+            }
+          }}>Save</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={snack.open} autoHideDuration={3000} onClose={() => setSnack({ open: false, message: '' })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity="success" variant="filled" sx={{ borderRadius: 2 }}>{snack.message}</Alert>
+      </Snackbar>
     </Box>
   )
 }

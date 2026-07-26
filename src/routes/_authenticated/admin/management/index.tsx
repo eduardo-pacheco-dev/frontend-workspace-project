@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -49,11 +49,12 @@ const mockCompanies: CompanyResponse = {
   totalPages: 1,
 }
 
-export const Route = createFileRoute('/_authenticated/admin/management')({
+export const Route = createFileRoute('/_authenticated/admin/management/')({
   component: ManagementPage,
 })
 
 function ManagementPage() {
+  const navigate = useNavigate()
   return (
     <Box>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
@@ -181,7 +182,12 @@ function ManagementPage() {
                   </TableHead>
                   <TableBody>
                     {mockCompanies.data.map((company) => (
-                      <TableRow key={company.id} hover>
+                      <TableRow
+                        key={company.id}
+                        hover
+                        sx={{ cursor: 'pointer' }}
+                        onClick={() => navigate({ to: '/admin/management/companies/$companyId', params: { companyId: String(company.id) } })}
+                      >
                         <TableCell>{company.id}</TableCell>
                         <TableCell sx={{ fontWeight: 600 }}>{company.name}</TableCell>
                         <TableCell>{company.cnpj}</TableCell>

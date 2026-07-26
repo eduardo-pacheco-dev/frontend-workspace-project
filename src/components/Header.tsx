@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router'
 import ThemeToggle from './ThemeToggle'
+import { useAuth } from '../lib/auth'
 
 export default function Header() {
+  const { user, logout } = useAuth()
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg">
       <nav className="page-wrap flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
@@ -84,6 +86,32 @@ export default function Header() {
           </a>
 
           <ThemeToggle />
+
+          <span className="mx-1.5 h-5 w-px bg-[var(--line)]" />
+
+          {user ? (
+            <>
+              <Link
+                to="/profile"
+                className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-medium text-[var(--sea-ink)] no-underline transition hover:bg-[var(--link-bg-hover)]"
+              >
+                {user.name}
+              </Link>
+              <button
+                onClick={logout}
+                className="cursor-pointer rounded-full border border-red-200 px-3 py-1.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-medium text-[var(--sea-ink)] no-underline transition hover:bg-[var(--link-bg-hover)]"
+            >
+              Sign in
+            </Link>
+          )}
         </div>
       </nav>
     </header>

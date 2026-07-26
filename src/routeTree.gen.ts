@@ -26,6 +26,7 @@ import { Route as AuthenticatedAdminStationsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminSupportRouteImport } from './routes/_authenticated/admin/support'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAdminManagementIndexRouteImport } from './routes/_authenticated/admin/management/index'
+import { Route as AuthenticatedAdminStationsStationIdRouteImport } from './routes/_authenticated/admin/stations.$stationId'
 import { Route as AuthenticatedAdminManagementCompaniesCompanyIdRouteImport } from './routes/_authenticated/admin/management/companies.$companyId'
 import { Route as AuthenticatedAdminManagementUsersUserIdRouteImport } from './routes/_authenticated/admin/management/users.$userId'
 
@@ -118,6 +119,12 @@ const AuthenticatedAdminManagementIndexRoute =
     path: '/management/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminStationsStationIdRoute =
+  AuthenticatedAdminStationsStationIdRouteImport.update({
+    id: '/$stationId',
+    path: '/$stationId',
+    getParentRoute: () => AuthenticatedAdminStationsRoute,
+  } as any)
 const AuthenticatedAdminManagementCompaniesCompanyIdRoute =
   AuthenticatedAdminManagementCompaniesCompanyIdRouteImport.update({
     id: '/management/companies/$companyId',
@@ -142,10 +149,11 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
-  '/admin/stations': typeof AuthenticatedAdminStationsRoute
+  '/admin/stations': typeof AuthenticatedAdminStationsRouteWithChildren
   '/admin/support': typeof AuthenticatedAdminSupportRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/stations/$stationId': typeof AuthenticatedAdminStationsStationIdRoute
   '/admin/management/': typeof AuthenticatedAdminManagementIndexRoute
   '/admin/management/companies/$companyId': typeof AuthenticatedAdminManagementCompaniesCompanyIdRoute
   '/admin/management/users/$userId': typeof AuthenticatedAdminManagementUsersUserIdRoute
@@ -160,10 +168,11 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
-  '/admin/stations': typeof AuthenticatedAdminStationsRoute
+  '/admin/stations': typeof AuthenticatedAdminStationsRouteWithChildren
   '/admin/support': typeof AuthenticatedAdminSupportRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/stations/$stationId': typeof AuthenticatedAdminStationsStationIdRoute
   '/admin/management': typeof AuthenticatedAdminManagementIndexRoute
   '/admin/management/companies/$companyId': typeof AuthenticatedAdminManagementCompaniesCompanyIdRoute
   '/admin/management/users/$userId': typeof AuthenticatedAdminManagementUsersUserIdRoute
@@ -182,10 +191,11 @@ export interface FileRoutesById {
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
-  '/_authenticated/admin/stations': typeof AuthenticatedAdminStationsRoute
+  '/_authenticated/admin/stations': typeof AuthenticatedAdminStationsRouteWithChildren
   '/_authenticated/admin/support': typeof AuthenticatedAdminSupportRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/stations/$stationId': typeof AuthenticatedAdminStationsStationIdRoute
   '/_authenticated/admin/management/': typeof AuthenticatedAdminManagementIndexRoute
   '/_authenticated/admin/management/companies/$companyId': typeof AuthenticatedAdminManagementCompaniesCompanyIdRoute
   '/_authenticated/admin/management/users/$userId': typeof AuthenticatedAdminManagementUsersUserIdRoute
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/admin/support'
     | '/admin/users'
     | '/admin/'
+    | '/admin/stations/$stationId'
     | '/admin/management/'
     | '/admin/management/companies/$companyId'
     | '/admin/management/users/$userId'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/admin/support'
     | '/admin/users'
     | '/admin'
+    | '/admin/stations/$stationId'
     | '/admin/management'
     | '/admin/management/companies/$companyId'
     | '/admin/management/users/$userId'
@@ -246,6 +258,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/support'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/stations/$stationId'
     | '/_authenticated/admin/management/'
     | '/_authenticated/admin/management/companies/$companyId'
     | '/_authenticated/admin/management/users/$userId'
@@ -378,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminManagementIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/stations/$stationId': {
+      id: '/_authenticated/admin/stations/$stationId'
+      path: '/$stationId'
+      fullPath: '/admin/stations/$stationId'
+      preLoaderRoute: typeof AuthenticatedAdminStationsStationIdRouteImport
+      parentRoute: typeof AuthenticatedAdminStationsRoute
+    }
     '/_authenticated/admin/management/companies/$companyId': {
       id: '/_authenticated/admin/management/companies/$companyId'
       path: '/management/companies/$companyId'
@@ -411,11 +431,26 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface AuthenticatedAdminStationsRouteChildren {
+  AuthenticatedAdminStationsStationIdRoute: typeof AuthenticatedAdminStationsStationIdRoute
+}
+
+const AuthenticatedAdminStationsRouteChildren: AuthenticatedAdminStationsRouteChildren =
+  {
+    AuthenticatedAdminStationsStationIdRoute:
+      AuthenticatedAdminStationsStationIdRoute,
+  }
+
+const AuthenticatedAdminStationsRouteWithChildren =
+  AuthenticatedAdminStationsRoute._addFileChildren(
+    AuthenticatedAdminStationsRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
-  AuthenticatedAdminStationsRoute: typeof AuthenticatedAdminStationsRoute
+  AuthenticatedAdminStationsRoute: typeof AuthenticatedAdminStationsRouteWithChildren
   AuthenticatedAdminSupportRoute: typeof AuthenticatedAdminSupportRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -428,7 +463,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
-  AuthenticatedAdminStationsRoute: AuthenticatedAdminStationsRoute,
+  AuthenticatedAdminStationsRoute: AuthenticatedAdminStationsRouteWithChildren,
   AuthenticatedAdminSupportRoute: AuthenticatedAdminSupportRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,

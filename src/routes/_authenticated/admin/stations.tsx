@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -40,6 +40,7 @@ export const Route = createFileRoute('/_authenticated/admin/stations')({
 })
 
 function StationsPage() {
+  const navigate = useNavigate()
   return (
     <Box>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
@@ -67,7 +68,12 @@ function StationsPage() {
               </TableHead>
               <TableBody>
                 {stations.map((station) => (
-                  <TableRow key={station.id} hover>
+                  <TableRow
+                    key={station.id}
+                    hover
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => navigate({ to: '/admin/stations/$stationId', params: { stationId: String(station.id) } })}
+                  >
                     <TableCell>
                       <Chip
                         label={station.status}

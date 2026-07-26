@@ -48,15 +48,55 @@ function ProfilePage() {
   const [editName, setEditName] = useState('')
   const [editEmail, setEditEmail] = useState('')
   const [profileUser, setProfileUser] = useState(user)
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(null)
   const [snack, setSnack] = useState({ open: false, message: '' })
 
   return (
     <Box>
       <Box sx={{ maxWidth: 960, mx: 'auto', px: 2, py: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4, flexWrap: 'wrap' }}>
-          <Avatar sx={{ width: 72, height: 72, bgcolor: theme.palette.primary.main, fontSize: 28, fontWeight: 700 }}>
-            {profileUser?.name.charAt(0).toUpperCase()}
-          </Avatar>
+          <Box sx={{ position: 'relative', cursor: 'pointer' }} onClick={() => document.getElementById('avatar-input')?.click()}>
+            <input
+              id="avatar-input"
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) {
+                  const reader = new FileReader()
+                  reader.onload = () => setAvatarSrc(reader.result as string)
+                  reader.readAsDataURL(file)
+                }
+              }}
+            />
+            <Avatar
+              src={avatarSrc ?? undefined}
+              sx={{
+                width: 72, height: 72,
+                bgcolor: avatarSrc ? 'transparent' : theme.palette.primary.main,
+                fontSize: 28, fontWeight: 700,
+                border: '2px solid transparent',
+                transition: 'border-color 0.15s',
+                '&:hover': { borderColor: theme.palette.primary.main },
+              }}
+            >
+              {!avatarSrc && profileUser?.name.charAt(0).toUpperCase()}
+            </Avatar>
+            <Box
+              sx={{
+                position: 'absolute', bottom: 0, right: 0,
+                bgcolor: 'background.paper', borderRadius: '50%',
+                width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: 1, borderColor: 'divider', boxShadow: 1,
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+            </Box>
+          </Box>
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 700 }}>{profileUser?.name}</Typography>
             <Typography variant="body1" color="text.secondary">{profileUser?.email}</Typography>

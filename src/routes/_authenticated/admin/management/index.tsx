@@ -71,6 +71,15 @@ function ManagementPage() {
   const [createOpen, setCreating] = useState(false)
   const [newCompany, setNewCompany] = useState<Partial<Company>>({})
   const [snack, setSnack] = useState({ open: false, message: '' })
+  const [users, setUsers] = useState([
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Editor', status: 'Active' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Viewer', status: 'Inactive' },
+    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Editor', status: 'Active' },
+    { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: 'Viewer', status: 'Active' },
+  ])
+  const [createUserOpen, setCreateUserOpen] = useState(false)
+  const [newUser, setNewUser] = useState<Partial<{ id: number; name: string; email: string; role: string; status: string }>>({})
   const first = companies[0]
   return (
     <Box>
@@ -197,9 +206,14 @@ function ManagementPage() {
         <Grid size={{ xs: 12 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-                All Users
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  All Users
+                </Typography>
+                <Button size="small" variant="contained" sx={{ borderRadius: 999 }} onClick={() => setCreateUserOpen(true)}>
+                  Create
+                </Button>
+              </Box>
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -212,13 +226,7 @@ function ManagementPage() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {[
-                      { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
-                      { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Editor', status: 'Active' },
-                      { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Viewer', status: 'Inactive' },
-                      { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Editor', status: 'Active' },
-                      { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: 'Viewer', status: 'Active' },
-                    ].map((user) => (
+                    {users.map((user) => (
                       <TableRow
                         key={user.id}
                         hover
@@ -299,6 +307,40 @@ function ManagementPage() {
         </DialogActions>
       </Dialog>
 
+      <Dialog open={createUserOpen} onClose={() => setCreateUserOpen(false)} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Create User</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+            <Grid size={{ xs: 12 }}>
+              <TextField label="Name" fullWidth size="small" value={newUser.name ?? ''} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <TextField label="Email" fullWidth size="small" type="email" value={newUser.email ?? ''} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField label="Role" fullWidth size="small" select value={newUser.role ?? ''} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}>
+                {['Admin', 'Editor', 'Viewer'].map((o) => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+              </TextField>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField label="Status" fullWidth size="small" select value={newUser.status ?? ''} onChange={(e) => setNewUser({ ...newUser, status: e.target.value })}>
+                {['Active', 'Inactive'].map((o) => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+              </TextField>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setCreateUserOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} onClick={() => {
+            const nextId = Math.max(...users.map((u) => u.id), 0) + 1
+            setUsers([...users, { id: nextId, name: '', email: '', role: '', status: '', ...newUser }])
+            setCreateUserOpen(false)
+            setNewUser({})
+            setSnack({ open: true, message: 'User created successfully.' })
+          }}>Create</Button>
+        </DialogActions>
+      </Dialog>
+
       <Dialog open={createOpen} onClose={() => setCreating(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
         <DialogTitle sx={{ fontWeight: 700 }}>Create Company</DialogTitle>
         <DialogContent>
@@ -371,7 +413,7 @@ function ManagementPage() {
           &copy; {new Date().getFullYear()} Your Company. All rights reserved.
         </Typography>
         <Typography variant="caption" color="text.disabled">
-          {companies.length} companies · 5 users
+          {companies.length} companies · {users.length} users
         </Typography>
       </Box>
     </Box>

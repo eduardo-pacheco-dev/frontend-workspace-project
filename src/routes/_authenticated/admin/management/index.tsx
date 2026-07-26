@@ -5,6 +5,7 @@ import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
+import Stack from '@mui/material/Stack'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -68,7 +69,48 @@ function ManagementPage() {
           <Card>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-                Companies
+                Company Details
+              </Typography>
+              {(() => {
+                const c = mockCompanies.data[0]
+                return (
+                  <Stack spacing={2}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+                      <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 700 }}>{c.name}</Typography>
+                        <Typography variant="body2" color="text.secondary">{c.tradeName} · {c.cnpj}</Typography>
+                      </Box>
+                      <Chip label={c.registrationStatus} size="small" color={c.registrationStatus === 'Active' ? 'success' : c.registrationStatus === 'Pending' ? 'warning' : 'default'} />
+                    </Box>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
+                      {[
+                        { label: 'Opening Date', value: c.openingDate },
+                        { label: 'Company Size', value: c.companySize },
+                        { label: 'Email', value: c.email },
+                        { label: 'Phone', value: c.phone },
+                      ].map((item) => (
+                        <Box key={item.label}>
+                          <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{item.value}</Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">Address</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>{c.address}</Typography>
+                    </Box>
+                  </Stack>
+                )
+              })()}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid size={{ xs: 12 }}>
+          <Card>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
+                All Companies
               </Typography>
               <TableContainer>
                 <Table>

@@ -20,6 +20,8 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
+import ImageList from '@mui/material/ImageList'
+import ImageListItem from '@mui/material/ImageListItem'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -715,6 +717,73 @@ function DocumentsSection() {
   )
 }
 
+const photos = [
+  { id: 1, src: 'https://picsum.photos/seed/station1/400/300', title: 'Site Overview', date: '2026-04-01' },
+  { id: 2, src: 'https://picsum.photos/seed/station2/400/300', title: 'Equipment Room', date: '2026-04-01' },
+  { id: 3, src: 'https://picsum.photos/seed/station3/400/300', title: 'Antenna Installation', date: '2026-03-28' },
+  { id: 4, src: 'https://picsum.photos/seed/station4/400/300', title: 'Cabling', date: '2026-03-28' },
+  { id: 5, src: 'https://picsum.photos/seed/station5/400/300', title: 'Power Supply', date: '2026-03-25' },
+  { id: 6, src: 'https://picsum.photos/seed/station6/400/300', title: 'Cooling System', date: '2026-03-25' },
+  { id: 7, src: 'https://picsum.photos/seed/station7/400/300', title: 'Security Setup', date: '2026-03-20' },
+  { id: 8, src: 'https://picsum.photos/seed/station8/400/300', title: 'Site Entrance', date: '2026-03-20' },
+]
+
+function PhotosSection() {
+  const [preview, setPreview] = useState<{ src: string; title: string; date: string } | null>(null)
+
+  return (
+    <>
+      <Card>
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Photos
+            </Typography>
+            <Button variant="contained" size="small" sx={{ borderRadius: 999 }}>
+              Upload Photos
+            </Button>
+          </Box>
+          <ImageList cols={4} gap={16} sx={{ m: 0 }}>
+            {photos.map((photo) => (
+              <ImageListItem key={photo.id} sx={{ cursor: 'pointer', borderRadius: 2, overflow: 'hidden' }} onClick={() => setPreview(photo)}>
+                <img src={photo.src} alt={photo.title} loading="lazy" style={{ display: 'block', width: '100%', height: 180, objectFit: 'cover' }} />
+                <Box sx={{ p: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 13 }}>{photo.title}</Typography>
+                  <Typography variant="caption" color="text.secondary">{photo.date}</Typography>
+                </Box>
+              </ImageListItem>
+            ))}
+          </ImageList>
+        </CardContent>
+      </Card>
+
+      <Dialog open={Boolean(preview)} onClose={() => setPreview(null)} maxWidth="md" slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden' } } }}>
+        {preview && (
+          <>
+            <Box sx={{ position: 'relative', lineHeight: 0 }}>
+              <img src={preview.src} alt={preview.title} style={{ display: 'block', width: '100%', maxHeight: '70vh', objectFit: 'contain', background: '#000' }} />
+            </Box>
+            <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{preview.title}</Typography>
+                <Typography variant="caption" color="text.secondary">{preview.date}</Typography>
+              </Box>
+              <Button size="small" variant="outlined" sx={{ borderRadius: 999 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ marginRight: 6 }}>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download
+              </Button>
+            </Box>
+          </>
+        )}
+      </Dialog>
+    </>
+  )
+}
+
 function StationDetailPage() {
   const [data, setData] = useState(station)
   const [editOpen, setEditOpen] = useState(false)
@@ -752,6 +821,7 @@ function StationDetailPage() {
         <Tab label="Site Address" />
         <Tab label="P20 Site Details" />
         <Tab label="Documents" />
+        <Tab label="Photos" />
       </Tabs>
 
       {tab === 0 && (
@@ -904,6 +974,8 @@ function StationDetailPage() {
       {tab === 5 && (
         <DocumentsSection />
       )}
+
+      {tab === 6 && <PhotosSection />}
 
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
         <DialogTitle sx={{ fontWeight: 700 }}>Edit Station</DialogTitle>

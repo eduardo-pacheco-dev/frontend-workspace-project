@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState } from 'react'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -7,6 +8,14 @@ import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 
 interface User {
   id: number
@@ -31,7 +40,10 @@ export const Route = createFileRoute('/_authenticated/admin/management/users/$us
 function UserDetailPage() {
   const { userId } = Route.useParams()
   const id = Number(userId)
-  const user = users.find((u) => u.id === id)
+  const [user, setUser] = useState(users.find((u) => u.id === id) ?? null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [form, setForm] = useState<User | null>(null)
+  const [snack, setSnack] = useState({ open: false, message: '' })
 
   if (!user) {
     return (
@@ -67,9 +79,12 @@ function UserDetailPage() {
             {user.email}
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1, ml: 'auto' }}>
+        <Box sx={{ display: 'flex', gap: 1, ml: 'auto', alignItems: 'center' }}>
           <Chip label={user.role} size="small" variant="outlined" color={user.role === 'Admin' ? 'primary' : 'default'} />
           <Chip label={user.status} size="small" color={user.status === 'Active' ? 'success' : 'default'} />
+          <Button variant="contained" size="small" sx={{ borderRadius: 999 }} onClick={() => { setForm({ ...user }); setEditOpen(true) }}>
+            Edit
+          </Button>
         </Box>
       </Stack>
 
@@ -97,6 +112,46 @@ function UserDetailPage() {
           </Card>
         </Grid>
       </Grid>
+
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Edit User</DialogTitle>
+        {form && (
+          <DialogContent>
+            <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+              <Grid size={{ xs: 12 }}>
+                <TextField label="Name" fullWidth size="small" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField label="Email" fullWidth size="small" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Role" fullWidth size="small" select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
+                  {['Admin', 'Editor', 'Viewer'].map((opt) => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Status" fullWidth size="small" select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                  {['Active', 'Inactive'].map((opt) => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}
+                </TextField>
+              </Grid>
+            </Grid>
+          </DialogContent>
+        )}
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setEditOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} onClick={() => {
+            if (form) {
+              setUser(form)
+              setEditOpen(false)
+              setSnack({ open: true, message: 'User updated successfully.' })
+            }
+          }}>Save</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={snack.open} autoHideDuration={3000} onClose={() => setSnack({ open: false, message: '' })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity="success" variant="filled" sx={{ borderRadius: 2 }}>{snack.message}</Alert>
+      </Snackbar>
     </Box>
   )
 }

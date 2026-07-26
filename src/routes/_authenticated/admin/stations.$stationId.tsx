@@ -18,6 +18,12 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
 
 interface Station {
   id: number
@@ -210,6 +216,7 @@ function StationDetailPage() {
         <Tab label="Site Custom Fields" />
         <Tab label="Site Address" />
         <Tab label="P20 Site Details" />
+        <Tab label="Documents" />
       </Tabs>
 
       {tab === 0 && (
@@ -357,6 +364,65 @@ function StationDetailPage() {
             </Card>
           </Grid>
         </Grid>
+      )}
+
+      {tab === 5 && (
+        <Card>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                Documents
+              </Typography>
+              <Button variant="contained" size="small" sx={{ borderRadius: 999 }}>
+                Upload
+              </Button>
+            </Box>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Type</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Upload Date</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {[
+                    { name: 'Site Survey Report.pdf', type: 'PDF', date: '2026-04-04', status: 'Approved' },
+                    { name: 'Installation Photos.zip', type: 'ZIP', date: '2026-04-03', status: 'Pending' },
+                    { name: 'Equipment List.xlsx', type: 'XLSX', date: '2026-04-02', status: 'Approved' },
+                    { name: 'Safety Compliance.pdf', type: 'PDF', date: '2026-03-28', status: 'Rejected' },
+                    { name: 'Site Access Form.docx', type: 'DOCX', date: '2026-03-25', status: 'Approved' },
+                  ].map((doc, i) => (
+                    <TableRow key={i} hover>
+                      <TableCell sx={{ fontWeight: 600 }}>{doc.name}</TableCell>
+                      <TableCell><Chip label={doc.type} size="small" variant="outlined" /></TableCell>
+                      <TableCell>{doc.date}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={doc.status}
+                          size="small"
+                          color={doc.status === 'Approved' ? 'success' : doc.status === 'Rejected' ? 'error' : 'warning'}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button size="small" variant="text" sx={{ borderRadius: 999, minWidth: 0, px: 1.5 }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                          </svg>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+        </Card>
       )}
 
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>

@@ -79,7 +79,7 @@ function RegisterPage() {
 
     try {
       await register(`${firstName} ${lastName}`.trim(), email, password)
-      navigate({ to: '/profile' })
+      navigate({ to: '/admin' })
     } catch {
       setError('Registration failed. Please try again.')
     }

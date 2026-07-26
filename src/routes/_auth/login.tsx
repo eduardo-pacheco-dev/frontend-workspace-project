@@ -25,7 +25,7 @@ function LoginPage() {
     setError('')
     try {
       await login(email, password)
-      navigate({ to: '/profile' })
+      navigate({ to: '/admin' })
     } catch {
       setError('Invalid email or password.')
     }

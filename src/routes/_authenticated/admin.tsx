@@ -29,6 +29,16 @@ interface AppItem {
 
 const apps: AppItem[] = [
   {
+    id: 'admin',
+    name: 'Admin',
+    route: '/admin',
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    ),
+  },
+  {
     id: 'dashboard',
     name: 'Dashboard',
     route: '/admin',
@@ -294,6 +304,17 @@ function AdminLayout() {
               </Box>
             </MenuItem>
             <Divider />
+            <MenuItem component={Link} to="/admin" onClick={() => setUserMenuAnchor(null)}>
+              <ListItemIcon>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+              </ListItemIcon>
+              Admin
+            </MenuItem>
             <MenuItem component={Link} to="/profile" onClick={() => setUserMenuAnchor(null)}>
               <ListItemIcon>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>

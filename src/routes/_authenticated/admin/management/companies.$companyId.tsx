@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState } from 'react'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -7,6 +8,14 @@ import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 
 interface Company {
   id: number
@@ -36,7 +45,10 @@ export const Route = createFileRoute('/_authenticated/admin/management/companies
 function CompanyDetailPage() {
   const { companyId } = Route.useParams()
   const id = Number(companyId)
-  const company = companies.find((c) => c.id === id)
+  const [company, setCompany] = useState(companies.find((c) => c.id === id) ?? null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [snack, setSnack] = useState<{ open: boolean; message: string }>({ open: false, message: '' })
+  const [form, setForm] = useState<Company | null>(null)
 
   if (!company) {
     return (
@@ -83,6 +95,17 @@ function CompanyDetailPage() {
           }
           sx={{ ml: 'auto' }}
         />
+        <Button
+          variant="contained"
+          size="small"
+          sx={{ borderRadius: 999, flexShrink: 0 }}
+          onClick={() => {
+            setForm({ ...company })
+            setEditOpen(true)
+          }}
+        >
+          Edit
+        </Button>
       </Stack>
 
       <Grid container spacing={3}>
@@ -133,6 +156,84 @@ function CompanyDetailPage() {
           </Card>
         </Grid>
       </Grid>
+
+      <Dialog
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        maxWidth="md"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>Edit Company</DialogTitle>
+        {form && (
+          <DialogContent>
+            <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Legal Name" fullWidth size="small" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Trade Name" fullWidth size="small" value={form.tradeName} onChange={(e) => setForm({ ...form, tradeName: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="CNPJ" fullWidth size="small" value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Opening Date" fullWidth size="small" type="date" value={form.openingDate} onChange={(e) => setForm({ ...form, openingDate: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Company Size" fullWidth size="small" select value={form.companySize} onChange={(e) => setForm({ ...form, companySize: e.target.value })}>
+                  {['LLC', 'Ltda', 'SA', 'Corporation', 'Individual'].map((opt) => (
+                    <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Registration Status" fullWidth size="small" select value={form.registrationStatus} onChange={(e) => setForm({ ...form, registrationStatus: e.target.value })}>
+                  {['Active', 'Pending', 'Inactive'].map((opt) => (
+                    <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField label="Address" fullWidth size="small" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Phone" fullWidth size="small" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Email" fullWidth size="small" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              </Grid>
+            </Grid>
+          </DialogContent>
+        )}
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setEditOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button
+            variant="contained"
+            sx={{ borderRadius: 999 }}
+            onClick={() => {
+              if (form) {
+                setCompany(form)
+                setEditOpen(false)
+                setSnack({ open: true, message: 'Company updated successfully.' })
+              }
+            }}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={3000}
+        onClose={() => setSnack({ open: false, message: '' })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" variant="filled" sx={{ borderRadius: 2 }}>
+          {snack.message}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

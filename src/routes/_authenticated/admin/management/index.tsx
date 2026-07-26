@@ -80,6 +80,8 @@ function ManagementPage() {
   ])
   const [createUserOpen, setCreateUserOpen] = useState(false)
   const [newUser, setNewUser] = useState<Partial<{ id: number; name: string; email: string; role: string; status: string }>>({})
+  const [editUserOpen, setEditUserOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState<{ id: number; name: string; email: string; role: string; status: string } | null>(null)
   const first = companies[0]
   return (
     <Box>
@@ -147,6 +149,9 @@ function ManagementPage() {
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Chip label={users[0].role} size="small" variant="outlined" color={users[0].role === 'Admin' ? 'primary' : 'default'} />
                     <Chip label={users[0].status} size="small" color={users[0].status === 'Active' ? 'success' : 'default'} />
+                    <Button size="small" variant="outlined" sx={{ borderRadius: 999 }} onClick={() => { setEditingUser({ ...users[0] }); setEditUserOpen(true) }}>
+                      Edit
+                    </Button>
                   </Box>
                 </Box>
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
@@ -373,6 +378,42 @@ function ManagementPage() {
             setNewUser({})
             setSnack({ open: true, message: 'User created successfully.' })
           }}>Create</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={editUserOpen} onClose={() => setEditUserOpen(false)} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Edit User</DialogTitle>
+        {editingUser && (
+          <DialogContent>
+            <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+              <Grid size={{ xs: 12 }}>
+                <TextField label="Name" fullWidth size="small" value={editingUser.name} onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField label="Email" fullWidth size="small" type="email" value={editingUser.email} onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Role" fullWidth size="small" select value={editingUser.role} onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}>
+                  {['Admin', 'Editor', 'Viewer'].map((o) => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Status" fullWidth size="small" select value={editingUser.status} onChange={(e) => setEditingUser({ ...editingUser, status: e.target.value })}>
+                  {['Active', 'Inactive'].map((o) => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+                </TextField>
+              </Grid>
+            </Grid>
+          </DialogContent>
+        )}
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setEditUserOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} onClick={() => {
+            if (editingUser) {
+              setUsers((prev) => prev.map((u) => (u.id === editingUser.id ? editingUser : u)))
+              setEditUserOpen(false)
+              setSnack({ open: true, message: 'User updated successfully.' })
+            }
+          }}>Save</Button>
         </DialogActions>
       </Dialog>
 

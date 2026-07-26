@@ -292,6 +292,9 @@ function TreeNodeRow({
 }) {
   const [expanded, setExpanded] = useState(true)
   const [menuEl, setMenuEl] = useState<HTMLElement | null>(null)
+  const [renameOpen, setRenameOpen] = useState(false)
+  const [renameValue, setRenameValue] = useState('')
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const folder = isFolder(node)
   const indent = depth * 4
 
@@ -308,10 +311,10 @@ function TreeNodeRow({
         onAdd(node.id, { id: newId(), name, type: ext, date: new Date().toISOString().slice(0, 10), status: 'Pending' })
       }
     } else if (action === 'rename') {
-      const newName = prompt('New name:', node.name)
-      if (newName) onRename(node.id, newName)
+      setRenameValue(node.name)
+      setRenameOpen(true)
     } else if (action === 'delete') {
-      if (confirm(`Delete "${node.name}"?`)) onDelete(node.id)
+      setDeleteOpen(true)
     }
   }
 
@@ -468,6 +471,76 @@ function TreeNodeRow({
       {folder && expanded && node.children?.map((child) => (
         <TreeNodeRow key={child.id} node={child} depth={depth + 1} onAdd={onAdd} onRename={onRename} onDelete={onDelete} />
       ))}
+
+      <Dialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>Delete {folder ? 'Folder' : 'File'}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Are you sure you want to delete <strong>{node.name}</strong>?{folder ? ' All contents inside will also be deleted.' : ''}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setDeleteOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            sx={{ borderRadius: 999 }}
+            onClick={() => {
+              onDelete(node.id)
+              setDeleteOpen(false)
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={renameOpen}
+        onClose={() => setRenameOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>Rename</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            size="small"
+            label="Name"
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            sx={{ mt: 1 }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && renameValue.trim()) {
+                onRename(node.id, renameValue.trim())
+                setRenameOpen(false)
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setRenameOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button
+            variant="contained"
+            sx={{ borderRadius: 999 }}
+            disabled={!renameValue.trim()}
+            onClick={() => {
+              onRename(node.id, renameValue.trim())
+              setRenameOpen(false)
+            }}
+          >
+            Rename
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

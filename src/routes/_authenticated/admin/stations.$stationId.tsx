@@ -763,6 +763,40 @@ function PhotosSection() {
   const [searchPhoto, setSearchPhoto] = useState('')
   const [expandedAlbums, setExpandedAlbums] = useState<Record<string, boolean>>({})
   const [pages, setPages] = useState<Record<string, number>>({})
+  const [uploadOpen, setUploadOpen] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
+  const [uploadAlbum, setUploadAlbum] = useState(albums[0].id)
+  const [uploadFiles, setUploadFiles] = useState<{ file: File; preview: string }[]>([])
+
+  function handleUploadFiles(files: FileList | File[]) {
+    const items = Array.from(files).filter((f) => f.type.startsWith('image/'))
+    setUploadFiles((prev) => [
+      ...prev,
+      ...items.map((f) => ({ file: f, preview: URL.createObjectURL(f) })),
+    ])
+  }
+
+  function removeUploadFile(index: number) {
+    setUploadFiles((prev) => {
+      URL.revokeObjectURL(prev[index].preview)
+      return prev.filter((_, i) => i !== index)
+    })
+  }
+
+  function confirmUpload() {
+    const target = albums.find((a) => a.id === uploadAlbum)
+    if (!target) return
+    const nextPhotoId = Math.max(...albums.flatMap((a) => a.photos.map((p) => p.id)), 0) + 1
+    const newPhotos = uploadFiles.map((f, i) => ({
+      id: nextPhotoId + i,
+      src: f.preview,
+      title: f.file.name.replace(/\.[^.]+$/, ''),
+      date: new Date().toISOString().slice(0, 10),
+    }))
+    target.photos.push(...newPhotos)
+    setUploadOpen(false)
+    setUploadFiles([])
+  }
 
   function toggleAlbum(id: string) {
     setExpandedAlbums((prev) => ({ ...prev, [id]: !prev[id] }))
@@ -795,7 +829,7 @@ function PhotosSection() {
                 onChange={(e) => setSearchPhoto(e.target.value)}
                 sx={{ minWidth: 200 }}
               />
-              <Button variant="contained" size="small" sx={{ borderRadius: 999, flexShrink: 0 }}>
+              <Button variant="contained" size="small" sx={{ borderRadius: 999, flexShrink: 0 }} onClick={() => setUploadOpen(true)}>
                 Upload Photos
               </Button>
             </Box>
@@ -883,6 +917,71 @@ function PhotosSection() {
           })}
         </CardContent>
       </Card>
+
+      <Dialog open={uploadOpen} onClose={() => { setUploadOpen(false); setUploadFiles([]) }} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Upload Photos</DialogTitle>
+        <DialogContent>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>Album</Typography>
+            <TextField select size="small" fullWidth value={uploadAlbum} onChange={(e) => setUploadAlbum(e.target.value)}>
+              {albums.map((a) => <MenuItem key={a.id} value={a.id}>{a.name}</MenuItem>)}
+            </TextField>
+          </Box>
+
+          <Box
+            sx={{
+              p: 4,
+              border: 2,
+              borderStyle: 'dashed',
+              borderRadius: 3,
+              borderColor: dragOver ? 'primary.main' : 'divider',
+              bgcolor: dragOver ? 'action.hover' : 'transparent',
+              transition: 'all 0.15s',
+              textAlign: 'center',
+              cursor: 'pointer',
+              mb: uploadFiles.length > 0 ? 2 : 0,
+            }}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files.length) handleUploadFiles(e.dataTransfer.files) }}
+            onClick={() => document.getElementById('photo-upload-input')?.click()}
+          >
+            <input id="photo-upload-input" type="file" multiple accept="image/*" hidden onChange={(e) => { if (e.target.files?.length) handleUploadFiles(e.target.files); e.target.value = '' }} />
+            <Box sx={{ color: 'text.disabled', mb: 1, display: 'flex', justifyContent: 'center' }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+            </Box>
+            <Typography variant="body2" color="text.secondary">
+              Drag and drop photos here, or click to select
+            </Typography>
+          </Box>
+
+          {uploadFiles.length > 0 && (
+            <ImageList cols={4} gap={8} sx={{ m: 0 }}>
+              {uploadFiles.map((f, i) => (
+                <ImageListItem key={i} sx={{ borderRadius: 1, overflow: 'hidden', position: 'relative' }}>
+                  <img src={f.preview} alt="" style={{ width: '100%', height: 80, objectFit: 'cover', display: 'block' }} />
+                  <Box
+                    sx={{ position: 'absolute', top: 2, right: 2, cursor: 'pointer', bgcolor: 'rgba(0,0,0,0.5)', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14, lineHeight: 1 }}
+                    onClick={(e) => { e.stopPropagation(); removeUploadFile(i) }}
+                  >
+                    ×
+                  </Box>
+                </ImageListItem>
+              ))}
+            </ImageList>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => { setUploadOpen(false); setUploadFiles([]) }} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} disabled={uploadFiles.length === 0} onClick={confirmUpload}>
+            Upload {uploadFiles.length > 0 ? `(${uploadFiles.length})` : ''}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={Boolean(preview)} onClose={() => setPreview(null)} maxWidth="md" slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden' } } }}>
         {preview && (

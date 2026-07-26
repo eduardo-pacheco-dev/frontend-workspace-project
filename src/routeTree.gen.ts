@@ -26,6 +26,7 @@ import { Route as AuthenticatedAdminSupportRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAdminManagementIndexRouteImport } from './routes/_authenticated/admin/management/index'
 import { Route as AuthenticatedAdminManagementCompaniesCompanyIdRouteImport } from './routes/_authenticated/admin/management/companies.$companyId'
+import { Route as AuthenticatedAdminManagementUsersUserIdRouteImport } from './routes/_authenticated/admin/management/users.$userId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -116,6 +117,12 @@ const AuthenticatedAdminManagementCompaniesCompanyIdRoute =
     path: '/management/companies/$companyId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminManagementUsersUserIdRoute =
+  AuthenticatedAdminManagementUsersUserIdRouteImport.update({
+    id: '/management/users/$userId',
+    path: '/management/users/$userId',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/management/': typeof AuthenticatedAdminManagementIndexRoute
   '/admin/management/companies/$companyId': typeof AuthenticatedAdminManagementCompaniesCompanyIdRoute
+  '/admin/management/users/$userId': typeof AuthenticatedAdminManagementUsersUserIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -149,6 +157,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/management': typeof AuthenticatedAdminManagementIndexRoute
   '/admin/management/companies/$companyId': typeof AuthenticatedAdminManagementCompaniesCompanyIdRoute
+  '/admin/management/users/$userId': typeof AuthenticatedAdminManagementUsersUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -169,6 +178,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/management/': typeof AuthenticatedAdminManagementIndexRoute
   '/_authenticated/admin/management/companies/$companyId': typeof AuthenticatedAdminManagementCompaniesCompanyIdRoute
+  '/_authenticated/admin/management/users/$userId': typeof AuthenticatedAdminManagementUsersUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/management/'
     | '/admin/management/companies/$companyId'
+    | '/admin/management/users/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/management'
     | '/admin/management/companies/$companyId'
+    | '/admin/management/users/$userId'
   id:
     | '__root__'
     | '/'
@@ -223,6 +235,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/admin/management/'
     | '/_authenticated/admin/management/companies/$companyId'
+    | '/_authenticated/admin/management/users/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminManagementCompaniesCompanyIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/management/users/$userId': {
+      id: '/_authenticated/admin/management/users/$userId'
+      path: '/management/users/$userId'
+      fullPath: '/admin/management/users/$userId'
+      preLoaderRoute: typeof AuthenticatedAdminManagementUsersUserIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
@@ -380,6 +400,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminManagementIndexRoute: typeof AuthenticatedAdminManagementIndexRoute
   AuthenticatedAdminManagementCompaniesCompanyIdRoute: typeof AuthenticatedAdminManagementCompaniesCompanyIdRoute
+  AuthenticatedAdminManagementUsersUserIdRoute: typeof AuthenticatedAdminManagementUsersUserIdRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
@@ -393,6 +414,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminManagementIndexRoute,
   AuthenticatedAdminManagementCompaniesCompanyIdRoute:
     AuthenticatedAdminManagementCompaniesCompanyIdRoute,
+  AuthenticatedAdminManagementUsersUserIdRoute:
+    AuthenticatedAdminManagementUsersUserIdRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =

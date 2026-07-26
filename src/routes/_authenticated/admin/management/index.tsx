@@ -219,7 +219,12 @@ function ManagementPage() {
                       { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Editor', status: 'Active' },
                       { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: 'Viewer', status: 'Active' },
                     ].map((user) => (
-                      <TableRow key={user.id} hover>
+                      <TableRow
+                        key={user.id}
+                        hover
+                        sx={{ cursor: 'pointer' }}
+                        onClick={() => navigate({ to: '/admin/management/users/$userId', params: { userId: String(user.id) } })}
+                      >
                         <TableCell>{user.id}</TableCell>
                         <TableCell sx={{ fontWeight: 600 }}>{user.name}</TableCell>
                         <TableCell>{user.email}</TableCell>

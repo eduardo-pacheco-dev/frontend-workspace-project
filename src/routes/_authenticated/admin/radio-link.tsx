@@ -64,8 +64,6 @@ function RadioLinkLayout() {
   const [filterStatus, setFilterStatus] = useState('')
   const [filterType, setFilterType] = useState('')
 
-  if (isChildMatch) return <Outlet />
-
   const filtered = useMemo(() => {
     let result = data
     if (search) {
@@ -100,6 +98,8 @@ function RadioLinkLayout() {
     if (sortKey !== column) return <Box component="span" sx={{ ml: 0.5, opacity: 0.3 }}>↕</Box>
     return <Box component="span" sx={{ ml: 0.5 }}>{sortDir === 'asc' ? '↑' : '↓'}</Box>
   }
+
+  if (isChildMatch) return <Outlet />
 
   return (
     <Box>

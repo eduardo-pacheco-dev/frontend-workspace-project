@@ -180,6 +180,173 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   )
 }
 
+interface FolderItem {
+  name: string
+  children?: (FolderItem | DocItem)[]
+}
+
+interface DocItem {
+  name: string
+  type: string
+  date: string
+  status: string
+}
+
+type TreeNode = FolderItem | DocItem
+
+function isFolder(node: TreeNode): node is FolderItem {
+  return 'children' in node
+}
+
+const folderTree: FolderItem = {
+  name: 'Documents',
+  children: [
+    {
+      name: 'Reports',
+      children: [
+        { name: 'Site Survey Report.pdf', type: 'PDF', date: '2026-04-04', status: 'Approved' },
+        { name: 'Safety Compliance.pdf', type: 'PDF', date: '2026-03-28', status: 'Rejected' },
+      ],
+    },
+    {
+      name: 'Photos',
+      children: [
+        { name: 'Installation Photos.zip', type: 'ZIP', date: '2026-04-03', status: 'Pending' },
+        { name: 'Drone Images.zip', type: 'ZIP', date: '2026-04-01', status: 'Approved' },
+      ],
+    },
+    {
+      name: 'Spreadsheets',
+      children: [
+        { name: 'Equipment List.xlsx', type: 'XLSX', date: '2026-04-02', status: 'Approved' },
+        { name: 'Budget Forecast.xlsx', type: 'XLSX', date: '2026-03-20', status: 'Approved' },
+      ],
+    },
+    { name: 'Site Access Form.docx', type: 'DOCX', date: '2026-03-25', status: 'Approved' },
+    { name: 'Network Diagram.pdf', type: 'PDF', date: '2026-03-15', status: 'Pending' },
+  ],
+}
+
+function TreeNodeRow({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
+  const [expanded, setExpanded] = useState(false)
+  const folder = isFolder(node)
+  const indent = depth * 24
+
+  if (!folder) {
+    return (
+      <TableRow hover sx={{ '&:hover': { bgcolor: 'action.hover' } }}>
+        <TableCell sx={{ pl: 3 + indent }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box component="span" sx={{ color: 'text.disabled', flexShrink: 0, display: 'flex' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+            </Box>
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>{node.name}</Typography>
+          </Box>
+        </TableCell>
+        <TableCell><Chip label={node.type} size="small" variant="outlined" /></TableCell>
+        <TableCell>
+          <Typography variant="body2" color="text.secondary">{node.date}</Typography>
+        </TableCell>
+        <TableCell>
+          <Chip label={node.status} size="small" color={node.status === 'Approved' ? 'success' : node.status === 'Rejected' ? 'error' : 'warning'} />
+        </TableCell>
+        <TableCell>
+          <Button size="small" variant="text" sx={{ borderRadius: 999, minWidth: 0, px: 1.5 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          </Button>
+        </TableCell>
+      </TableRow>
+    )
+  }
+
+  return (
+    <>
+      <TableRow
+        hover
+        onClick={() => setExpanded(!expanded)}
+        sx={{ cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
+      >
+        <TableCell sx={{ pl: 3 + indent }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              component="span"
+              sx={{
+                flexShrink: 0,
+                display: 'flex',
+                transition: 'transform 0.15s',
+                transform: expanded ? 'rotate(90deg)' : 'none',
+                color: 'text.disabled',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </Box>
+            <Box component="span" sx={{ color: 'warning.main', flexShrink: 0, display: 'flex' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
+            </Box>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{node.name}</Typography>
+          </Box>
+        </TableCell>
+        <TableCell><Chip label="Folder" size="small" variant="outlined" /></TableCell>
+        <TableCell><Typography variant="body2" color="text.disabled">—</Typography></TableCell>
+        <TableCell><Typography variant="body2" color="text.disabled">—</Typography></TableCell>
+        <TableCell><Typography variant="body2" color="text.disabled">—</Typography></TableCell>
+      </TableRow>
+      {expanded && node.children?.map((child, i) => <TreeNodeRow key={`${node.name}-${i}`} node={child} depth={depth + 1} />)}
+    </>
+  )
+}
+
+function DocumentsSection() {
+  return (
+    <Card>
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Documents
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button variant="outlined" size="small" sx={{ borderRadius: 999 }} onClick={() => {}}>
+              New Folder
+            </Button>
+            <Button variant="contained" size="small" sx={{ borderRadius: 999 }}>
+              Upload
+            </Button>
+          </Box>
+        </Box>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Type</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {folderTree.children?.map((child, i) => (
+                <TreeNodeRow key={i} node={child} />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </CardContent>
+    </Card>
+  )
+}
+
 function StationDetailPage() {
   const [data, setData] = useState(station)
   const [editOpen, setEditOpen] = useState(false)
@@ -367,62 +534,7 @@ function StationDetailPage() {
       )}
 
       {tab === 5 && (
-        <Card>
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                Documents
-              </Typography>
-              <Button variant="contained" size="small" sx={{ borderRadius: 999 }}>
-                Upload
-              </Button>
-            </Box>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Type</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Upload Date</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {[
-                    { name: 'Site Survey Report.pdf', type: 'PDF', date: '2026-04-04', status: 'Approved' },
-                    { name: 'Installation Photos.zip', type: 'ZIP', date: '2026-04-03', status: 'Pending' },
-                    { name: 'Equipment List.xlsx', type: 'XLSX', date: '2026-04-02', status: 'Approved' },
-                    { name: 'Safety Compliance.pdf', type: 'PDF', date: '2026-03-28', status: 'Rejected' },
-                    { name: 'Site Access Form.docx', type: 'DOCX', date: '2026-03-25', status: 'Approved' },
-                  ].map((doc, i) => (
-                    <TableRow key={i} hover>
-                      <TableCell sx={{ fontWeight: 600 }}>{doc.name}</TableCell>
-                      <TableCell><Chip label={doc.type} size="small" variant="outlined" /></TableCell>
-                      <TableCell>{doc.date}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={doc.status}
-                          size="small"
-                          color={doc.status === 'Approved' ? 'success' : doc.status === 'Rejected' ? 'error' : 'warning'}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button size="small" variant="text" sx={{ borderRadius: 999, minWidth: 0, px: 1.5 }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="7 10 12 15 17 10" />
-                            <line x1="12" y1="15" x2="12" y2="3" />
-                          </svg>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
+        <DocumentsSection />
       )}
 
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>

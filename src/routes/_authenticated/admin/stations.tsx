@@ -60,15 +60,33 @@ function StationsPage() {
   const [snack, setSnack] = useState({ open: false, message: '' })
   const [sortKey, setSortKey] = useState<string>('')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+  const [search, setSearch] = useState('')
+  const [filterStatus, setFilterStatus] = useState('')
+  const [filterType, setFilterType] = useState('')
+
+  const filtered = useMemo(() => {
+    let result = data
+    if (search) {
+      const q = search.toLowerCase()
+      result = result.filter((s) =>
+        s.siteName.toLowerCase().includes(q) ||
+        s.customerSiteId.toLowerCase().includes(q) ||
+        s.customer.toLowerCase().includes(q),
+      )
+    }
+    if (filterStatus) result = result.filter((s) => s.status === filterStatus)
+    if (filterType) result = result.filter((s) => s.siteType === filterType)
+    return result
+  }, [data, search, filterStatus, filterType])
 
   const sorted = useMemo(() => {
-    if (!sortKey) return data
-    return [...data].sort((a, b) => {
+    if (!sortKey) return filtered
+    return [...filtered].sort((a, b) => {
       const aVal = (a as any)[sortKey] ?? ''
       const bVal = (b as any)[sortKey] ?? ''
       return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
     })
-  }, [data, sortKey, sortDir])
+  }, [filtered, sortKey, sortDir])
 
   function toggleSort(key: string) {
     if (sortKey === key) {
@@ -102,6 +120,27 @@ function StationsPage() {
         <Button variant="contained" sx={{ borderRadius: 999, flexShrink: 0 }} onClick={() => setCreateOpen(true)}>
           Create
         </Button>
+      </Box>
+
+      <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+        <TextField
+          placeholder="Search by name, ID or customer..."
+          size="small"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{ minWidth: 280 }}
+          slotProps={{ input: { startAdornment: <Box component="span" sx={{ mr: 1, opacity: 0.5 }}>🔍</Box> } }}
+        />
+        <TextField select size="small" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} sx={{ minWidth: 140 }}>
+          <MenuItem value="">All status</MenuItem>
+          <MenuItem value="Active">Active</MenuItem>
+          <MenuItem value="Inactive">Inactive</MenuItem>
+          <MenuItem value="Pending">Pending</MenuItem>
+        </TextField>
+        <TextField select size="small" value={filterType} onChange={(e) => setFilterType(e.target.value)} sx={{ minWidth: 160 }}>
+          <MenuItem value="">All types</MenuItem>
+          {[...new Set(data.map((s) => s.siteType))].map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+        </TextField>
       </Box>
 
       <Card>
@@ -157,7 +196,7 @@ function StationsPage() {
           </TableContainer>
           <TablePagination
             component="div"
-            count={data.length}
+            count={filtered.length}
             page={0}
             rowsPerPage={10}
             rowsPerPageOptions={[5, 10, 25]}

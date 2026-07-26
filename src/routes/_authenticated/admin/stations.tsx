@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, Outlet, useMatches } from '@tanstack/react-router'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -41,6 +41,13 @@ export const Route = createFileRoute('/_authenticated/admin/stations')({
 
 function StationsPage() {
   const navigate = useNavigate()
+  const matches = useMatches()
+  const isChildMatch = matches.some((m) => m.routeId === '/_authenticated/admin/stations/$stationId')
+
+  if (isChildMatch) {
+    return <Outlet />
+  }
+
   return (
     <Box>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>

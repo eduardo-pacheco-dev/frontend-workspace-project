@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -8,6 +9,10 @@ import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Chip from '@mui/material/Chip'
 import Avatar from '@mui/material/Avatar'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
 import { useTheme } from '@mui/material/styles'
 import { useAuth } from '../../../lib/auth'
 
@@ -34,6 +39,7 @@ const projects = [
 function ProfilePage() {
   const { user } = useAuth()
   const theme = useTheme()
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   return (
     <Box>
@@ -139,7 +145,7 @@ function ProfilePage() {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   Once you delete your account, there is no going back. Please be certain.
                 </Typography>
-                <Button variant="outlined" color="error" sx={{ borderRadius: 999 }}>
+                <Button variant="outlined" color="error" sx={{ borderRadius: 999 }} onClick={() => setDeleteOpen(true)}>
                   Delete Account
                 </Button>
               </CardContent>
@@ -147,6 +153,19 @@ function ProfilePage() {
           </Grid>
         </Grid>
       </Box>
+
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} maxWidth="xs" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700, color: 'error.main' }}>Delete Account</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Are you sure you want to delete your account? This action cannot be undone. All your data, company information, and project associations will be permanently removed.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setDeleteOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" color="error" sx={{ borderRadius: 999 }} onClick={() => setDeleteOpen(false)}>Delete</Button>
+        </DialogActions>
+      </Dialog>
 
       <Box component="footer" sx={{ mt: 4, pt: 3, pb: 2, borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, px: 2 }}>
         <Typography variant="body2" color="text.secondary">&copy; {new Date().getFullYear()} Your Company. All rights reserved.</Typography>

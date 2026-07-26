@@ -98,7 +98,11 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const state = useSyncExternalStore(store.subscribe, store.getState)
+  const state = useSyncExternalStore(
+    store.subscribe,
+    store.getState,
+    () => ({ user: null, isLoading: false }),
+  )
   const router = useRouter()
 
   useEffect(() => {

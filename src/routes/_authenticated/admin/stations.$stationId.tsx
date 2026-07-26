@@ -1078,6 +1078,75 @@ function MapSection() {
   )
 }
 
+function CommentsSection() {
+  const [comments, setComments] = useState([
+    { id: 1, author: 'John Doe', text: 'Site inspection completed. All equipment looks good.', date: '2026-04-04', role: 'Engineer' },
+    { id: 2, author: 'Jane Smith', text: 'Please update the safety compliance documents.', date: '2026-04-02', role: 'Manager' },
+    { id: 3, author: 'Bob Johnson', text: 'Scheduled maintenance for next week.', date: '2026-03-30', role: 'Technician' },
+  ])
+  const [newComment, setNewComment] = useState('')
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newComment.trim()) return
+    const nextCommentId = Math.max(...comments.map((c) => c.id), 0) + 1
+    setComments([...comments, {
+      id: nextCommentId,
+      author: 'Current User',
+      text: newComment.trim(),
+      date: new Date().toISOString().slice(0, 10),
+      role: 'Admin',
+    }])
+    setNewComment('')
+  }
+
+  return (
+    <Card>
+      <CardContent sx={{ p: 3 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
+          Comments
+        </Typography>
+
+        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', gap: 1, mb: 3 }}>
+          <TextField
+            placeholder="Add a comment..."
+            size="small"
+            fullWidth
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+          />
+          <Button type="submit" variant="contained" sx={{ borderRadius: 999, flexShrink: 0 }} disabled={!newComment.trim()}>
+            Send
+          </Button>
+        </Box>
+
+        <Stack spacing={2}>
+          {comments.map((comment) => (
+            <Box
+              key={comment.id}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                border: 1,
+                borderColor: 'divider',
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>{comment.author}</Typography>
+                  <Chip label={comment.role} size="small" variant="outlined" sx={{ height: 20, '& .MuiChip-label': { fontSize: 11, px: 0.75 } }} />
+                </Box>
+                <Typography variant="caption" color="text.disabled">{comment.date}</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary">{comment.text}</Typography>
+            </Box>
+          ))}
+        </Stack>
+      </CardContent>
+    </Card>
+  )
+}
+
 function StationDetailPage() {
   const [data, setData] = useState(station)
   const [editOpen, setEditOpen] = useState(false)
@@ -1117,6 +1186,7 @@ function StationDetailPage() {
         <Tab label="Documents" />
         <Tab label="Photos" />
         <Tab label="Map" />
+        <Tab label="Comments" />
       </Tabs>
 
       {tab === 0 && (
@@ -1273,6 +1343,8 @@ function StationDetailPage() {
       {tab === 6 && <PhotosSection />}
 
       {tab === 7 && <MapSection />}
+
+      {tab === 8 && <CommentsSection />}
 
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
         <DialogTitle sx={{ fontWeight: 700 }}>Edit Station</DialogTitle>

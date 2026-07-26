@@ -193,6 +193,50 @@ function ManagementPage() {
             </CardContent>
           </Card>
         </Grid>
+
+        <Grid size={{ xs: 12 }}>
+          <Card>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
+                All Users
+              </Typography>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700 }}>ID</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Role</TableCell>
+                      <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {[
+                      { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
+                      { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Editor', status: 'Active' },
+                      { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Viewer', status: 'Inactive' },
+                      { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Editor', status: 'Active' },
+                      { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: 'Viewer', status: 'Active' },
+                    ].map((user) => (
+                      <TableRow key={user.id} hover>
+                        <TableCell>{user.id}</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>{user.name}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <Chip label={user.role} size="small" variant="outlined" color={user.role === 'Admin' ? 'primary' : 'default'} />
+                        </TableCell>
+                        <TableCell>
+                          <Chip label={user.status} size="small" color={user.status === 'Active' ? 'success' : 'default'} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
 
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
@@ -322,7 +366,7 @@ function ManagementPage() {
           &copy; {new Date().getFullYear()} Your Company. All rights reserved.
         </Typography>
         <Typography variant="caption" color="text.disabled">
-          {companies.length} companies registered
+          {companies.length} companies · 5 users
         </Typography>
       </Box>
     </Box>

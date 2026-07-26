@@ -20,12 +20,14 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
+import { Route as AuthenticatedAdminRadioLinkRouteImport } from './routes/_authenticated/admin/radio-link'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminStationsRouteImport } from './routes/_authenticated/admin/stations'
 import { Route as AuthenticatedAdminSupportRouteImport } from './routes/_authenticated/admin/support'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAdminManagementIndexRouteImport } from './routes/_authenticated/admin/management/index'
+import { Route as AuthenticatedAdminRadioLinkLinkIdRouteImport } from './routes/_authenticated/admin/radio-link.$linkId'
 import { Route as AuthenticatedAdminStationsStationIdRouteImport } from './routes/_authenticated/admin/stations.$stationId'
 import { Route as AuthenticatedAdminManagementCompaniesCompanyIdRouteImport } from './routes/_authenticated/admin/management/companies.$companyId'
 import { Route as AuthenticatedAdminManagementUsersUserIdRouteImport } from './routes/_authenticated/admin/management/users.$userId'
@@ -84,6 +86,12 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminRadioLinkRoute =
+  AuthenticatedAdminRadioLinkRouteImport.update({
+    id: '/radio-link',
+    path: '/radio-link',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminReportsRoute =
   AuthenticatedAdminReportsRouteImport.update({
     id: '/reports',
@@ -119,6 +127,12 @@ const AuthenticatedAdminManagementIndexRoute =
     path: '/management/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminRadioLinkLinkIdRoute =
+  AuthenticatedAdminRadioLinkLinkIdRouteImport.update({
+    id: '/$linkId',
+    path: '/$linkId',
+    getParentRoute: () => AuthenticatedAdminRadioLinkRoute,
+  } as any)
 const AuthenticatedAdminStationsStationIdRoute =
   AuthenticatedAdminStationsStationIdRouteImport.update({
     id: '/$stationId',
@@ -147,12 +161,14 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/profile': typeof AuthenticatedProfileRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/radio-link': typeof AuthenticatedAdminRadioLinkRouteWithChildren
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/stations': typeof AuthenticatedAdminStationsRouteWithChildren
   '/admin/support': typeof AuthenticatedAdminSupportRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/radio-link/$linkId': typeof AuthenticatedAdminRadioLinkLinkIdRoute
   '/admin/stations/$stationId': typeof AuthenticatedAdminStationsStationIdRoute
   '/admin/management/': typeof AuthenticatedAdminManagementIndexRoute
   '/admin/management/companies/$companyId': typeof AuthenticatedAdminManagementCompaniesCompanyIdRoute
@@ -166,12 +182,14 @@ export interface FileRoutesByTo {
   '/reset-password': typeof AuthResetPasswordRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/radio-link': typeof AuthenticatedAdminRadioLinkRouteWithChildren
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/stations': typeof AuthenticatedAdminStationsRouteWithChildren
   '/admin/support': typeof AuthenticatedAdminSupportRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/radio-link/$linkId': typeof AuthenticatedAdminRadioLinkLinkIdRoute
   '/admin/stations/$stationId': typeof AuthenticatedAdminStationsStationIdRoute
   '/admin/management': typeof AuthenticatedAdminManagementIndexRoute
   '/admin/management/companies/$companyId': typeof AuthenticatedAdminManagementCompaniesCompanyIdRoute
@@ -189,12 +207,14 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/radio-link': typeof AuthenticatedAdminRadioLinkRouteWithChildren
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/stations': typeof AuthenticatedAdminStationsRouteWithChildren
   '/_authenticated/admin/support': typeof AuthenticatedAdminSupportRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/radio-link/$linkId': typeof AuthenticatedAdminRadioLinkLinkIdRoute
   '/_authenticated/admin/stations/$stationId': typeof AuthenticatedAdminStationsStationIdRoute
   '/_authenticated/admin/management/': typeof AuthenticatedAdminManagementIndexRoute
   '/_authenticated/admin/management/companies/$companyId': typeof AuthenticatedAdminManagementCompaniesCompanyIdRoute
@@ -211,12 +231,14 @@ export interface FileRouteTypes {
     | '/admin'
     | '/profile'
     | '/admin/analytics'
+    | '/admin/radio-link'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/stations'
     | '/admin/support'
     | '/admin/users'
     | '/admin/'
+    | '/admin/radio-link/$linkId'
     | '/admin/stations/$stationId'
     | '/admin/management/'
     | '/admin/management/companies/$companyId'
@@ -230,12 +252,14 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/profile'
     | '/admin/analytics'
+    | '/admin/radio-link'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/stations'
     | '/admin/support'
     | '/admin/users'
     | '/admin'
+    | '/admin/radio-link/$linkId'
     | '/admin/stations/$stationId'
     | '/admin/management'
     | '/admin/management/companies/$companyId'
@@ -252,12 +276,14 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/profile'
     | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/radio-link'
     | '/_authenticated/admin/reports'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/stations'
     | '/_authenticated/admin/support'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/radio-link/$linkId'
     | '/_authenticated/admin/stations/$stationId'
     | '/_authenticated/admin/management/'
     | '/_authenticated/admin/management/companies/$companyId'
@@ -349,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/radio-link': {
+      id: '/_authenticated/admin/radio-link'
+      path: '/radio-link'
+      fullPath: '/admin/radio-link'
+      preLoaderRoute: typeof AuthenticatedAdminRadioLinkRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/reports': {
       id: '/_authenticated/admin/reports'
       path: '/reports'
@@ -391,6 +424,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminManagementIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/radio-link/$linkId': {
+      id: '/_authenticated/admin/radio-link/$linkId'
+      path: '/$linkId'
+      fullPath: '/admin/radio-link/$linkId'
+      preLoaderRoute: typeof AuthenticatedAdminRadioLinkLinkIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRadioLinkRoute
+    }
     '/_authenticated/admin/stations/$stationId': {
       id: '/_authenticated/admin/stations/$stationId'
       path: '/$stationId'
@@ -431,6 +471,21 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface AuthenticatedAdminRadioLinkRouteChildren {
+  AuthenticatedAdminRadioLinkLinkIdRoute: typeof AuthenticatedAdminRadioLinkLinkIdRoute
+}
+
+const AuthenticatedAdminRadioLinkRouteChildren: AuthenticatedAdminRadioLinkRouteChildren =
+  {
+    AuthenticatedAdminRadioLinkLinkIdRoute:
+      AuthenticatedAdminRadioLinkLinkIdRoute,
+  }
+
+const AuthenticatedAdminRadioLinkRouteWithChildren =
+  AuthenticatedAdminRadioLinkRoute._addFileChildren(
+    AuthenticatedAdminRadioLinkRouteChildren,
+  )
+
 interface AuthenticatedAdminStationsRouteChildren {
   AuthenticatedAdminStationsStationIdRoute: typeof AuthenticatedAdminStationsStationIdRoute
 }
@@ -448,6 +503,7 @@ const AuthenticatedAdminStationsRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminRadioLinkRoute: typeof AuthenticatedAdminRadioLinkRouteWithChildren
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminStationsRoute: typeof AuthenticatedAdminStationsRouteWithChildren
@@ -461,6 +517,8 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminRadioLinkRoute:
+    AuthenticatedAdminRadioLinkRouteWithChildren,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminStationsRoute: AuthenticatedAdminStationsRouteWithChildren,

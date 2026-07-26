@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -32,7 +32,7 @@ const projects = [
 ]
 
 function ProfilePage() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const theme = useTheme()
 
   return (
@@ -130,12 +130,22 @@ function ProfilePage() {
               </CardContent>
             </Card>
           </Grid>
+          <Grid size={{ xs: 12 }}>
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: 'error.main' }}>
+                  Danger Zone
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Once you delete your account, there is no going back. Please be certain.
+                </Typography>
+                <Button variant="outlined" color="error" sx={{ borderRadius: 999 }}>
+                  Delete Account
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-
-        <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
-          <Button component={Link} to="/admin" variant="outlined" sx={{ borderRadius: 999 }}>Dashboard</Button>
-          <Button onClick={logout} variant="outlined" color="error" sx={{ borderRadius: 999 }}>Sign out</Button>
-        </Stack>
       </Box>
 
       <Box component="footer" sx={{ mt: 4, pt: 3, pb: 2, borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, px: 2 }}>

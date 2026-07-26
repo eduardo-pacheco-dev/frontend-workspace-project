@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState } from 'react'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -7,6 +8,14 @@ import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import TextField from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 
 interface Station {
   id: number
@@ -179,7 +188,11 @@ function SectionCard({ title, children }: { title: string; children: React.React
 }
 
 function StationDetailPage() {
-  const s = station
+  const [data, setData] = useState(station)
+  const [editOpen, setEditOpen] = useState(false)
+  const [form, setForm] = useState<Station | null>(null)
+  const [snack, setSnack] = useState({ open: false, message: '' })
+  const s = data
 
   return (
     <Box>
@@ -193,7 +206,10 @@ function StationDetailPage() {
           <Typography variant="h5" sx={{ fontWeight: 700 }}>{s.name}</Typography>
           <Typography variant="body2" color="text.secondary">{s.customerSiteId} · {s.siteReferenceId}</Typography>
         </Box>
-        <Chip label={s.status} size="small" color={s.status === 'Active' ? 'success' : 'default'} />
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Chip label={s.status} size="small" color={s.status === 'Active' ? 'success' : 'default'} />
+          <Button variant="contained" size="small" sx={{ borderRadius: 999 }} onClick={() => { setForm({ ...s }); setEditOpen(true) }}>Edit</Button>
+        </Box>
       </Stack>
 
       <Grid container spacing={3}>
@@ -284,6 +300,65 @@ function StationDetailPage() {
           <DetailRow label="Created" value={s.created} />
         </SectionCard>
       </Grid>
+
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>Edit Station</DialogTitle>
+        {form && (
+          <DialogContent>
+            <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Name" fullWidth size="small" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Customer Site ID" fullWidth size="small" value={form.customerSiteId} onChange={(e) => setForm({ ...form, customerSiteId: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Site Reference ID" fullWidth size="small" value={form.siteReferenceId} onChange={(e) => setForm({ ...form, siteReferenceId: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Status" fullWidth size="small" select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                  {['Active', 'Inactive', 'Pending'].map((o) => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Site Type" fullWidth size="small" value={form.siteType} onChange={(e) => setForm({ ...form, siteType: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Customer" fullWidth size="small" value={form.customer} onChange={(e) => setForm({ ...form, customer: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Latitude" fullWidth size="small" value={form.latitude} onChange={(e) => setForm({ ...form, latitude: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Longitude" fullWidth size="small" value={form.longitude} onChange={(e) => setForm({ ...form, longitude: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Country" fullWidth size="small" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField label="Timezone" fullWidth size="small" value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField label="Site Address" fullWidth size="small" value={form.siteAddress} onChange={(e) => setForm({ ...form, siteAddress: e.target.value })} />
+              </Grid>
+            </Grid>
+          </DialogContent>
+        )}
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setEditOpen(false)} sx={{ borderRadius: 999 }}>Cancel</Button>
+          <Button variant="contained" sx={{ borderRadius: 999 }} onClick={() => {
+            if (form) {
+              setData(form)
+              setEditOpen(false)
+              setSnack({ open: true, message: 'Station updated successfully.' })
+            }
+          }}>Save</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={snack.open} autoHideDuration={3000} onClose={() => setSnack({ open: false, message: '' })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity="success" variant="filled" sx={{ borderRadius: 2 }}>{snack.message}</Alert>
+      </Snackbar>
     </Box>
   )
 }

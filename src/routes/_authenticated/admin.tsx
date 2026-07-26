@@ -114,6 +114,20 @@ const apps: AppItem[] = [
     ),
   },
   {
+    id: 'radio-link',
+    name: 'Radio Link',
+    route: '/admin/radio-link',
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+        <path d="M5 17a4 4 0 0 1 0-8 6 6 0 0 1 11.2-3.2A5 5 0 0 1 19 15a4 4 0 0 1-4 4H5z" />
+        <path d="M12 11a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
+        <line x1="12" y1="7" x2="12" y2="9" />
+        <line x1="9" y1="12" x2="7" y2="12" />
+        <line x1="15" y1="12" x2="17" y2="12" />
+      </svg>
+    ),
+  },
+  {
     id: 'support',
     name: 'Support',
     route: '/admin/support',

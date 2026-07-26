@@ -49,6 +49,11 @@ function ProfilePage() {
         <Button component={Link} to="/admin/dashboard" variant="outlined" sx={{ borderRadius: 999 }}>Dashboard</Button>
         <Button onClick={logout} variant="outlined" color="error" sx={{ borderRadius: 999 }}>Sign out</Button>
       </Stack>
+
+      <Box component="footer" sx={{ mt: 6, pt: 3, pb: 2, borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+        <Typography variant="body2" color="text.secondary">&copy; {new Date().getFullYear()} Your Company. All rights reserved.</Typography>
+        <Typography variant="caption" color="text.disabled">Profile</Typography>
+      </Box>
     </Box>
   )
 }

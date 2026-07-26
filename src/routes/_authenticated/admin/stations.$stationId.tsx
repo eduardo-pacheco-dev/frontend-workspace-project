@@ -1078,13 +1078,24 @@ function MapSection() {
   )
 }
 
+interface Comment {
+  id: number
+  author: string
+  text: string
+  date: string
+  role: string
+  edited?: boolean
+}
+
 function CommentsSection() {
-  const [comments, setComments] = useState([
+  const [comments, setComments] = useState<Comment[]>([
     { id: 1, author: 'John Doe', text: 'Site inspection completed. All equipment looks good.', date: '2026-04-04', role: 'Engineer' },
     { id: 2, author: 'Jane Smith', text: 'Please update the safety compliance documents.', date: '2026-04-02', role: 'Manager' },
     { id: 3, author: 'Bob Johnson', text: 'Scheduled maintenance for next week.', date: '2026-03-30', role: 'Technician' },
   ])
   const [newComment, setNewComment] = useState('')
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editText, setEditText] = useState('')
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -1100,11 +1111,27 @@ function CommentsSection() {
     setNewComment('')
   }
 
+  function handleEdit(comment: Comment) {
+    setEditingId(comment.id)
+    setEditText(comment.text)
+  }
+
+  function handleSaveEdit(id: number) {
+    if (!editText.trim()) return
+    setComments((prev) => prev.map((c) => c.id === id ? { ...c, text: editText.trim(), edited: true } : c))
+    setEditingId(null)
+    setEditText('')
+  }
+
+  function handleDelete(id: number) {
+    setComments((prev) => prev.filter((c) => c.id !== id))
+  }
+
   return (
     <Card>
       <CardContent sx={{ p: 3 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-          Comments
+          Comments ({comments.length})
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', gap: 1, mb: 3 }}>
@@ -1135,10 +1162,39 @@ function CommentsSection() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="body2" sx={{ fontWeight: 700 }}>{comment.author}</Typography>
                   <Chip label={comment.role} size="small" variant="outlined" sx={{ height: 20, '& .MuiChip-label': { fontSize: 11, px: 0.75 } }} />
+                  {comment.edited && (
+                    <Typography variant="caption" color="text.disabled" sx={{ fontStyle: 'italic' }}>(edited)</Typography>
+                  )}
                 </Box>
                 <Typography variant="caption" color="text.disabled">{comment.date}</Typography>
               </Box>
-              <Typography variant="body2" color="text.secondary">{comment.text}</Typography>
+
+              {editingId === comment.id ? (
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <TextField
+                    size="small"
+                    fullWidth
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    autoFocus
+                  />
+                  <Button size="small" variant="contained" sx={{ borderRadius: 999, flexShrink: 0 }} onClick={() => handleSaveEdit(comment.id)}>Save</Button>
+                  <Button size="small" variant="text" sx={{ borderRadius: 999, flexShrink: 0 }} onClick={() => setEditingId(null)}>Cancel</Button>
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">{comment.text}</Typography>
+              )}
+
+              {editingId !== comment.id && (
+                <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
+                  <Button size="small" variant="text" sx={{ borderRadius: 999, minWidth: 0, px: 1, fontSize: 12 }} onClick={() => handleEdit(comment)}>
+                    Edit
+                  </Button>
+                  <Button size="small" variant="text" color="error" sx={{ borderRadius: 999, minWidth: 0, px: 1, fontSize: 12 }} onClick={() => handleDelete(comment.id)}>
+                    Delete
+                  </Button>
+                </Box>
+              )}
             </Box>
           ))}
         </Stack>

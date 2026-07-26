@@ -196,7 +196,7 @@ function StationDetailPage() {
 
   return (
     <Box>
-      <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 3 }}>
+      <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 1 }}>
         <Button component={Link} to="/admin/stations" variant="text" sx={{ borderRadius: 999, minWidth: 0, px: 1 }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
             <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -204,83 +204,117 @@ function StationDetailPage() {
         </Button>
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>{s.name}</Typography>
-          <Typography variant="body2" color="text.secondary">{s.customerSiteId} · {s.siteReferenceId}</Typography>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', mt: 0.25 }}>
+            <Typography variant="body2" color="text.secondary">{s.customerSiteId}</Typography>
+            <Typography variant="body2" color="text.disabled">·</Typography>
+            <Typography variant="body2" color="text.secondary">{s.siteReferenceId}</Typography>
+            <Typography variant="body2" color="text.disabled">·</Typography>
+            <Chip label={s.status} size="small" color={s.status === 'Active' ? 'success' : s.status === 'Pending' ? 'warning' : 'default'} sx={{ height: 20, '& .MuiChip-label': { fontSize: 11, px: 0.75 } }} />
+            <Chip label={s.siteType} size="small" variant="outlined" sx={{ height: 20, '& .MuiChip-label': { fontSize: 11, px: 0.75 } }} />
+          </Stack>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Chip label={s.status} size="small" color={s.status === 'Active' ? 'success' : 'default'} />
-          <Button variant="contained" size="small" sx={{ borderRadius: 999 }} onClick={() => { setForm({ ...s }); setEditOpen(true) }}>Edit</Button>
-        </Box>
+        <Button variant="contained" size="small" sx={{ borderRadius: 999, flexShrink: 0 }} onClick={() => { setForm({ ...s }); setEditOpen(true) }}>Edit</Button>
       </Stack>
 
       <Grid container spacing={3}>
-        <SectionCard title="Basic Details">
-          <DetailRow label="Customer Site ID" value={s.customerSiteId} />
-          <DetailRow label="Site Reference ID" value={s.siteReferenceId} />
-          <DetailRow label="Name" value={s.name} />
-          <DetailRow label="Hide Site Location" value={s.hideSiteLocation} />
-          <DetailRow label="Latitude" value={s.latitude} />
-          <DetailRow label="Longitude" value={s.longitude} />
-          <DetailRow label="Geofence Distance (meters)" value={s.geofenceDistance} />
-          <DetailRow label="Geofence Distance Status" value={s.geofenceStatus} />
-          <DetailRow label="Site Category" value={s.siteCategory} />
-          <DetailRow label="Country" value={s.country} />
-          <DetailRow label="Customer" value={s.customer} />
-          <DetailRow label="Status" value={s.status} />
-          <DetailRow label="Timezone" value={s.timezone} />
-          <DetailRow label="Cluster ID" value={s.clusterId} />
-          <DetailRow label="Cluster Name" value={s.clusterName} />
-          <DetailRow label="Site Address" value={s.siteAddress} />
-          <DetailRow label="Zip Code" value={s.zipCode} />
-          <DetailRow label="District" value={s.district} />
-          <DetailRow label="Region" value={s.region} />
-          <DetailRow label="City" value={s.city} />
-          <DetailRow label="Virtual Site" value={s.virtualSite} />
-          <DetailRow label="Use For On Duty Ad Hoc Module" value={s.useForOnDuty} />
-          <DetailRow label="Priority Mode" value={s.priorityMode} />
-          <DetailRow label="Site Profile" value={s.siteProfile} />
-        </SectionCard>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'text.secondary' }}>Location</Typography>
+              <DetailRow label="Latitude" value={s.latitude} />
+              <DetailRow label="Longitude" value={s.longitude} />
+              <DetailRow label="Country" value={s.country} />
+              <DetailRow label="Timezone" value={s.timezone} />
+              <DetailRow label="Site Address" value={s.siteAddress} />
+              <DetailRow label="Zip Code" value={s.zipCode} />
+              <DetailRow label="District" value={s.district} />
+              <DetailRow label="Region" value={s.region} />
+              <DetailRow label="City" value={s.city} />
+              <DetailRow label="Hide Site Location" value={s.hideSiteLocation} />
+              <DetailRow label="Geofence Distance (meters)" value={s.geofenceDistance} />
+              <DetailRow label="Geofence Distance Status" value={s.geofenceStatus} />
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'text.secondary' }}>General</Typography>
+              <DetailRow label="Customer Site ID" value={s.customerSiteId} />
+              <DetailRow label="Site Reference ID" value={s.siteReferenceId} />
+              <DetailRow label="Name" value={s.name} />
+              <DetailRow label="Site Category" value={s.siteCategory} />
+              <DetailRow label="Customer" value={s.customer} />
+              <DetailRow label="Status" value={s.status} />
+              <DetailRow label="Cluster ID" value={s.clusterId} />
+              <DetailRow label="Cluster Name" value={s.clusterName} />
+              <DetailRow label="Virtual Site" value={s.virtualSite} />
+              <DetailRow label="Use For On Duty Ad Hoc Module" value={s.useForOnDuty} />
+              <DetailRow label="Priority Mode" value={s.priorityMode} />
+              <DetailRow label="Site Profile" value={s.siteProfile} />
+            </CardContent>
+          </Card>
+        </Grid>
 
-        <SectionCard title="Site Details">
-          <DetailRow label="Contact Id" value={s.contactId} />
-          <DetailRow label="First Name" value={s.firstName} />
-          <DetailRow label="Last Name" value={s.lastName} />
-          <DetailRow label="Fax" value={s.fax} />
-          <DetailRow label="Email" value={s.email} />
-          <DetailRow label="Phone" value={s.phone} />
-          <DetailRow label="Postal Code" value={s.postalCode} />
-          <DetailRow label="Role" value={s.role} />
-          <DetailRow label="Remark" value={s.remark} />
-          <DetailRow label="Site" value={s.site} />
-          <DetailRow label="Site Access Antennas" value={s.siteAccessAntennas} />
-          <DetailRow label="Site Access Keys After Hours" value={s.siteAccessKeysAfterHours} />
-          <DetailRow label="Site Access Site After Hours" value={s.siteAccessSiteAfterHours} />
-          <DetailRow label="Site Access Keys Office Hours" value={s.siteAccessKeysOfficeHours} />
-          <DetailRow label="Site Access Site Office Hours" value={s.siteAccessSiteOfficeHours} />
-          <DetailRow label="Site Direction To Site" value={s.siteDirectionToSite} />
-          <DetailRow label="Site Equipment Location" value={s.siteEquipmentLocation} />
-          <DetailRow label="Site Special Vehicle" value={s.siteSpecialVehicle} />
-        </SectionCard>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'text.secondary' }}>Site Details</Typography>
+              <DetailRow label="Contact Id" value={s.contactId} />
+              <DetailRow label="First Name" value={s.firstName} />
+              <DetailRow label="Last Name" value={s.lastName} />
+              <DetailRow label="Fax" value={s.fax} />
+              <DetailRow label="Email" value={s.email} />
+              <DetailRow label="Phone" value={s.phone} />
+              <DetailRow label="Postal Code" value={s.postalCode} />
+              <DetailRow label="Role" value={s.role} />
+              <DetailRow label="Remark" value={s.remark} />
+              <DetailRow label="Site" value={s.site} />
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'text.secondary' }}>Site Access</Typography>
+              <DetailRow label="Site Access Antennas" value={s.siteAccessAntennas} />
+              <DetailRow label="Site Access Keys After Hours" value={s.siteAccessKeysAfterHours} />
+              <DetailRow label="Site Access Site After Hours" value={s.siteAccessSiteAfterHours} />
+              <DetailRow label="Site Access Keys Office Hours" value={s.siteAccessKeysOfficeHours} />
+              <DetailRow label="Site Access Site Office Hours" value={s.siteAccessSiteOfficeHours} />
+              <DetailRow label="Site Direction To Site" value={s.siteDirectionToSite} />
+              <DetailRow label="Site Equipment Location" value={s.siteEquipmentLocation} />
+              <DetailRow label="Site Special Vehicle" value={s.siteSpecialVehicle} />
+            </CardContent>
+          </Card>
+        </Grid>
 
         <SectionCard title="Site Custom Fields">
-          <DetailRow label="OC Ordem Complexa" value={s.ocOrdemComplexa} />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.75, borderBottom: 1, borderColor: 'divider' }}>
-            <Typography variant="body2" color="text.secondary">Health and Safety Risk Details</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>
-              {s.healthSafetyRiskDetails.length === 0 ? 'None selected' : s.healthSafetyRiskDetails.join(', ')}
-            </Typography>
-          </Box>
-          <DetailRow label="Health and Safety Other Detail" value={s.healthSafetyOtherDetail} />
-          <DetailRow label="Site Type" value={s.siteType} />
-          <DetailRow label="Structure Type" value={s.structureType} />
-          <DetailRow label="Structure Profile" value={s.structureProfile} />
-          <DetailRow label="Other CW Details" value={s.otherCwDetails} />
-          <DetailRow label="Tower or Pole Height in meters" value={s.towerOrPoleHeight} />
-          <DetailRow label="Equipment Housing" value={s.equipmentHousing} />
-          <DetailRow label="Number of 2G cells at site" value={s.num2g} />
-          <DetailRow label="Number of 3G cells at site" value={s.num3g} />
-          <DetailRow label="Number of 4G cells at site" value={s.num4g} />
-          <DetailRow label="Number of 5G cells at site" value={s.num5g} />
-          <DetailRow label="Site Health and Safety Risks" value={s.healthSafetyRisks} />
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <DetailRow label="OC Ordem Complexa" value={s.ocOrdemComplexa} />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.75, borderBottom: 1, borderColor: 'divider' }}>
+                <Typography variant="body2" color="text.secondary">Health and Safety Risk Details</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500, textAlign: 'right', maxWidth: '55%' }}>
+                  {s.healthSafetyRiskDetails.length === 0 ? 'None selected' : s.healthSafetyRiskDetails.join(', ')}
+                </Typography>
+              </Box>
+              <DetailRow label="Health and Safety Other Detail" value={s.healthSafetyOtherDetail} />
+              <DetailRow label="Site Type" value={s.siteType} />
+              <DetailRow label="Structure Type" value={s.structureType} />
+              <DetailRow label="Structure Profile" value={s.structureProfile} />
+              <DetailRow label="Other CW Details" value={s.otherCwDetails} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <DetailRow label="Tower or Pole Height in meters" value={s.towerOrPoleHeight} />
+              <DetailRow label="Equipment Housing" value={s.equipmentHousing} />
+              <DetailRow label="Number of 2G cells at site" value={s.num2g} />
+              <DetailRow label="Number of 3G cells at site" value={s.num3g} />
+              <DetailRow label="Number of 4G cells at site" value={s.num4g} />
+              <DetailRow label="Number of 5G cells at site" value={s.num5g} />
+              <DetailRow label="Site Health and Safety Risks" value={s.healthSafetyRisks} />
+            </Grid>
+          </Grid>
         </SectionCard>
 
         <SectionCard title="Site Address Custom Fields">
@@ -289,15 +323,21 @@ function StationDetailPage() {
         </SectionCard>
 
         <SectionCard title="P20 Site Details">
-          <DetailRow label="ZI Partner Code" value={s.ziPartnerCode} />
-          <DetailRow label="Name1" value={s.name1} />
-          <DetailRow label="Name2" value={s.name2} />
-          <DetailRow label="Search Term" value={s.searchTerm} />
-          <DetailRow label="Street" value={s.street} />
-          <DetailRow label="City" value={s.cityP20} />
-          <DetailRow label="Postal Code" value={s.postalCodeP20} />
-          <DetailRow label="Country" value={s.countryP20} />
-          <DetailRow label="Created" value={s.created} />
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <DetailRow label="ZI Partner Code" value={s.ziPartnerCode} />
+              <DetailRow label="Name1" value={s.name1} />
+              <DetailRow label="Name2" value={s.name2} />
+              <DetailRow label="Search Term" value={s.searchTerm} />
+              <DetailRow label="Created" value={s.created} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <DetailRow label="Street" value={s.street} />
+              <DetailRow label="City" value={s.cityP20} />
+              <DetailRow label="Postal Code" value={s.postalCodeP20} />
+              <DetailRow label="Country" value={s.countryP20} />
+            </Grid>
+          </Grid>
         </SectionCard>
       </Grid>
 

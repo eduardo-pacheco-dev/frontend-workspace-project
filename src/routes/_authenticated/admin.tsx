@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { createFileRoute, Link, Outlet, useNavigate, useLocation } from '@tanstack/react-router'
+import { useState, useMemo } from 'react'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
@@ -17,19 +17,31 @@ import { useTheme } from '@mui/material/styles'
 import { useAuth } from '../../lib/auth'
 
 export const Route = createFileRoute('/_authenticated/admin')({
-  component: AdminPage,
+  component: AdminLayout,
 })
 
 interface AppItem {
   id: string
   name: string
+  route: string
   icon: React.ReactNode
 }
 
 const apps: AppItem[] = [
   {
+    id: 'admin',
+    name: 'Admin',
+    route: '/admin/management',
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    ),
+  },
+  {
     id: 'dashboard',
     name: 'Dashboard',
+    route: '/admin',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
         <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -42,6 +54,7 @@ const apps: AppItem[] = [
   {
     id: 'users',
     name: 'Users',
+    route: '/admin/users',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -54,6 +67,7 @@ const apps: AppItem[] = [
   {
     id: 'settings',
     name: 'Settings',
+    route: '/admin/settings',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
         <circle cx="12" cy="12" r="3" />
@@ -64,6 +78,7 @@ const apps: AppItem[] = [
   {
     id: 'reports',
     name: 'Reports',
+    route: '/admin/reports',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -77,6 +92,7 @@ const apps: AppItem[] = [
   {
     id: 'analytics',
     name: 'Analytics',
+    route: '/admin/analytics',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
         <line x1="18" y1="20" x2="18" y2="10" />
@@ -88,6 +104,7 @@ const apps: AppItem[] = [
   {
     id: 'support',
     name: 'Support',
+    route: '/admin/support',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
         <circle cx="12" cy="12" r="10" />
@@ -98,13 +115,19 @@ const apps: AppItem[] = [
   },
 ]
 
-function AdminPage() {
+function AdminLayout() {
   const { user, logout } = useAuth()
   const theme = useTheme()
+  const navigate = useNavigate()
+  const location = useLocation()
   const [appMenuAnchor, setAppMenuAnchor] = useState<HTMLElement | null>(null)
   const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(null)
   const [notifMenuAnchor, setNotifMenuAnchor] = useState<HTMLElement | null>(null)
-  const userMenuOpen = Boolean(userMenuAnchor)
+
+  const currentApp = useMemo(
+    () => apps.find((a) => a.route === location.pathname) ?? apps[0],
+    [location.pathname],
+  )
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 64px)' }}>
@@ -137,9 +160,7 @@ function AdminPage() {
             transformOrigin={{ horizontal: 'left', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
             slotProps={{
-              paper: {
-                sx: { mt: 1, borderRadius: 3, p: 1.5, minWidth: 280 },
-              },
+              paper: { sx: { mt: 1, borderRadius: 3, p: 1.5, minWidth: 280 } },
             }}
           >
             <Box
@@ -161,15 +182,18 @@ function AdminPage() {
                     p: 1.5,
                     borderRadius: 2,
                     cursor: 'pointer',
-                    bgcolor: 'transparent',
-                    borderColor: 'divider',
+                    bgcolor: location.pathname === app.route ? 'action.selected' : 'transparent',
+                    borderColor: location.pathname === app.route ? 'primary.main' : 'divider',
                     transition: 'background-color 0.15s, border-color 0.15s',
                     '&:hover': {
                       bgcolor: theme.palette.action.hover,
                       borderColor: theme.palette.primary.main,
                     },
                   }}
-                  onClick={() => setAppMenuAnchor(null)}
+                  onClick={() => {
+                    setAppMenuAnchor(null)
+                    navigate({ to: app.route })
+                  }}
                 >
                   <Box sx={{ color: theme.palette.primary.main }}>{app.icon}</Box>
                   <Typography variant="caption" sx={{ fontWeight: 600, textAlign: 'center' }}>
@@ -181,7 +205,7 @@ function AdminPage() {
           </Menu>
 
           <Typography variant="h6" sx={{ fontWeight: 700, flexGrow: 1 }}>
-            Admin
+            {currentApp.name}
           </Typography>
 
           <Tooltip title="Notifications">
@@ -213,30 +237,10 @@ function AdminPage() {
             </Box>
             <Divider />
             {[
-              {
-                title: 'New user registered',
-                description: 'John Doe created an account',
-                time: '2 min ago',
-                unread: true,
-              },
-              {
-                title: 'Server alert',
-                description: 'CPU usage exceeded 90% on prod-01',
-                time: '15 min ago',
-                unread: true,
-              },
-              {
-                title: 'Weekly report ready',
-                description: 'Download your analytics summary',
-                time: '1 hour ago',
-                unread: false,
-              },
-              {
-                title: 'Deployment successful',
-                description: 'v2.4.1 deployed to production',
-                time: '3 hours ago',
-                unread: false,
-              },
+              { title: 'New user registered', description: 'John Doe created an account', time: '2 min ago', unread: true },
+              { title: 'Server alert', description: 'CPU usage exceeded 90% on prod-01', time: '15 min ago', unread: true },
+              { title: 'Weekly report ready', description: 'Download your analytics summary', time: '1 hour ago', unread: false },
+              { title: 'Deployment successful', description: 'v2.4.1 deployed to production', time: '3 hours ago', unread: false },
             ].map((notif, i) => (
               <MenuItem
                 key={i}
@@ -245,22 +249,10 @@ function AdminPage() {
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                   {notif.unread && (
-                    <Box
-                      sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        bgcolor: 'primary.main',
-                        flexShrink: 0,
-                        mt: 0.5,
-                      }}
-                    />
+                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main', flexShrink: 0, mt: 0.5 }} />
                   )}
                   <Box sx={{ flexGrow: 1 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: notif.unread ? 700 : 400 }}
-                    >
+                    <Typography variant="body2" sx={{ fontWeight: notif.unread ? 700 : 400 }}>
                       {notif.title}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -274,10 +266,7 @@ function AdminPage() {
               </MenuItem>
             ))}
             <Divider />
-            <MenuItem
-              sx={{ justifyContent: 'center', py: 1 }}
-              onClick={() => setNotifMenuAnchor(null)}
-            >
+            <MenuItem sx={{ justifyContent: 'center', py: 1 }} onClick={() => setNotifMenuAnchor(null)}>
               <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>
                 View all notifications
               </Typography>
@@ -302,7 +291,7 @@ function AdminPage() {
 
           <Menu
             anchorEl={userMenuAnchor}
-            open={userMenuOpen}
+            open={Boolean(userMenuAnchor)}
             onClose={() => setUserMenuAnchor(null)}
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
@@ -310,15 +299,19 @@ function AdminPage() {
           >
             <MenuItem disabled sx={{ opacity: '1 !important' }}>
               <Box sx={{ py: 0.5 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {user?.name}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {user?.email}
-                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>{user?.name}</Typography>
+                <Typography variant="caption" color="text.secondary">{user?.email}</Typography>
               </Box>
             </MenuItem>
             <Divider />
+            <MenuItem component={Link} to="/admin/management" onClick={() => setUserMenuAnchor(null)}>
+              <ListItemIcon>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </ListItemIcon>
+              Admin
+            </MenuItem>
             <MenuItem component={Link} to="/profile" onClick={() => setUserMenuAnchor(null)}>
               <ListItemIcon>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -328,12 +321,7 @@ function AdminPage() {
               </ListItemIcon>
               Profile
             </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setUserMenuAnchor(null)
-                logout()
-              }}
-            >
+            <MenuItem onClick={() => { setUserMenuAnchor(null); logout() }}>
               <ListItemIcon>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -347,18 +335,8 @@ function AdminPage() {
         </Toolbar>
       </AppBar>
 
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 3,
-        }}
-      >
-        <Typography variant="body1" color="text.secondary">
-          Select a section from the sidebar to get started.
-        </Typography>
+      <Box sx={{ flexGrow: 1, p: 3 }}>
+        <Outlet />
       </Box>
     </Box>
   )

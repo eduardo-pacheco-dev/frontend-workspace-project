@@ -1019,7 +1019,7 @@ function MapSection() {
   return (
     <Card>
       <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
               Location Map
@@ -1028,6 +1028,19 @@ function MapSection() {
               {s.latitude}, {s.longitude} · {s.siteAddress}
             </Typography>
           </Box>
+          <Button
+            variant="outlined"
+            size="small"
+            sx={{ borderRadius: 999 }}
+            href={`https://www.google.com/maps?q=${s.latitude},${s.longitude}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6 }}>
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+            </svg>
+            Open in Google Maps
+          </Button>
         </Box>
         <Box
           sx={{
